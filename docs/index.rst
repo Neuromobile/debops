@@ -1,3 +1,9 @@
+.. Copyright (C) 2017-2019 Maciej Delmanowski <drybjed@gmail.com>
+.. Copyright (C) 2019      Nicolas Quiniou-Briand <nqb@inverse.ca>
+.. Copyright (C) 2019      Tasos Alvas <tasos.alvas@qwertyuiopia.com>
+.. Copyright (C) 2017-2019 DebOps <https://debops.org/>
+.. SPDX-License-Identifier: GPL-3.0-or-later
+
 .. image:: ../lib/images/debops.png
    :align: right
    :width: 10em
@@ -8,7 +14,7 @@ DebOps
 
 *Your Debian-based data center in a box*
 
-|Travis CI| |GitLab CI| |CII Best Practices|
+|Travis CI| |GitLab CI| |CII Best Practices| |REUSE Status|
 
 .. |Travis CI| image:: https://img.shields.io/travis/debops/debops.svg?style=flat
    :target: https://travis-ci.org/debops/debops
@@ -18,6 +24,9 @@ DebOps
 
 .. |CII Best Practices| image:: https://bestpractices.coreinfrastructure.org/projects/237/badge
    :target: https://bestpractices.coreinfrastructure.org/en/projects/237
+
+.. |REUSE Status| image:: https://api.reuse.software/badge/github.com/debops/debops
+   :target: https://api.reuse.software/info/github.com/debops/debops
 
 .. include:: includes/global.rst
 
