@@ -3,7 +3,7 @@
 
 # .. Copyright (C) 2016 Maciej Delmanowski <drybjed@gmail.com>
 # .. Copyright (C) 2016 DebOps <https://debops.org/>
-# .. SPDX-License-Identifier: GPL-3.0-or-later
+# .. SPDX-License-Identifier: GPL-3.0-only
 
 # .. _gitlab_runner__ref_defaults:
 
@@ -380,6 +380,15 @@ gitlab_runner__vagrant_libvirt: '{{ True
 gitlab_runner__vagrant_libvirt_patch: '{{ True
                                           if (gitlab_runner__vagrant_libvirt|bool)
                                           else False }}'
+
+                                                                   # ]]]
+# .. envvar:: gitlab_runner__vagrant_libvirt_patch_state [[[
+#
+# Select the state of the custom ``vagrant-libvirt`` patches managed by this
+# role. If the state is ``present``, the patches will be applied on the host;
+# the ``absent`` state will remove them and restore the source to its original
+# state.
+gitlab_runner__vagrant_libvirt_patch_state: 'present'
 
                                                                    # ]]]
 # .. envvar:: gitlab_runner__vagrant_lxc [[[

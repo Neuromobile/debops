@@ -1,6 +1,6 @@
 {# Copyright (C) 2016-2017 Maciej Delmanowski <drybjed@gmail.com>
  # Copyright (C) 2016-2017 DebOps <https://debops.org/>
- # SPDX-License-Identifier: GPL-3.0-or-later
+ # SPDX-License-Identifier: GPL-3.0-only
  #}
 # {{ ansible_managed }}
 
@@ -10,7 +10,7 @@
 # and files in /etc/cron.d. These files also have username fields,
 # that none of the other crontabs do.
 
-{% for variable, value in cron__crontab_combined_environment.items() %}
+{% for variable, value in cron__crontab_combined_environment | dictsort %}
 {{ '{}={}'.format(variable | upper, value) }}
 {% endfor %}
 

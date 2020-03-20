@@ -1,7 +1,7 @@
 ---
 # Copyright (C) 2016 Maciej Delmanowski <drybjed@gmail.com>
 # Copyright (C) 2016 DebOps <https://debops.org/>
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: GPL-3.0-only
 
 - import_role:
     name: 'secret'
@@ -234,6 +234,7 @@
     src: '{{ "patches/package_domain-keep-ssh-host-keys-"
              + (item | basename | replace("vagrant-libvirt-","")) + ".patch" }}'
     basedir: '{{ item }}'
+    state: '{{ gitlab_runner__vagrant_libvirt_patch_state }}'
   with_items: '{{ gitlab_runner__register_libvirt_source.stdout_lines }}'
   when: gitlab_runner__vagrant_libvirt_patch|bool
   tags: [ 'role::gitlab_runner:patch' ]

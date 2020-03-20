@@ -81,8 +81,18 @@ Updates of upstream application versions
   installer versions have been updated to their next point releases, 9.11 and
   10.3 respectively.
 
+- In the :ref:`debops.owncloud` role, the Nextcloud version installed by
+  default has been updated to ``v17.0``.
+
 - In the :ref:`debops.roundcube` role, the Roundcube version installed by
   default has been updated to ``v1.4.2``.
+
+Continuous Integration
+''''''''''''''''''''''
+
+- The Vagrant provisioning script will install Ansible from PyPI by default.
+  The version included in the current Debian Stable (Buster) is too old for the
+  DebOps playbooks and roles.
 
 General
 '''''''
@@ -100,6 +110,11 @@ General
 
   .. __: https://reuse.software/spec/
   .. __: https://spdx.org/ids
+
+:ref:`debops.owncloud` role
+'''''''''''''''''''''''''''
+
+- Support has been added for Nextcloud 17.0 and 18.0.
 
 :ref:`debops.postfix` role
 ''''''''''''''''''''''''''
@@ -120,11 +135,45 @@ Removed
 Fixed
 ~~~~~
 
+General
+'''''''
+
+- Fix `an issue with Ansible Collections`__ where roles used via the
+  ``include_role`` Ansible module broke due to the split into multiple
+  collections. All roles will now have the ``debops.debops`` collection
+  included by default in the :file:`meta/main.yml` file to tell Ansible where
+  to look for dependent roles.
+
+  .. __: https://github.com/ansible/ansible/issues/67723
+
 :ref:`debops.ferm` role
 '''''''''''''''''''''''
 
 - Fixed incorrect removal of the ferm rule set by :ref:`debops.avahi` on
   IPv6-enabled systems.
+
+:ref:`debops.gitlab_runner` role
+''''''''''''''''''''''''''''''''
+
+- Don't re-create removed :file:`/etc/machine-id` contents during Vagrant box
+  creation. This should fix issues with IP addresses received from DHCP by the
+  Vagrant machines.
+
+  .. warning:: This fix is applied using the :command:`patch` command on the
+               files packaged by APT. Existing installations will have to be
+               updated manually, alternatively the changes applied previously
+               should be removed from the affected files before the role is
+               applied. See the patch files in the role :file:`files/patches/`
+               directory for more information.
+
+:ref:`debops.minio` role
+''''''''''''''''''''''''
+
+- Fix an issue during installation of recent MinIO releases, where during an
+  initial restart the MinIO service would switch into "safe mode" when
+  a problem with configuration is detected; this would prevent the service to
+  be restarted correctly. Now the service should be properly stopped by
+  :command:`systemd` after a stop timeout.
 
 :ref:`debops.netbase` role
 ''''''''''''''''''''''''''
