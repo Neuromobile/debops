@@ -50,6 +50,13 @@ New DebOps roles
 
   .. __: https://influxdata.com/
 
+:ref:`debops.pki` role
+''''''''''''''''''''''
+
+- The role can now instruct acme-tiny to register an ACME account with one or
+  more contact URLs. Let's Encrypt for example uses this information to notify
+  you about expiring certificates and emergency revocation.
+
 :ref:`debops.postconf` role
 '''''''''''''''''''''''''''
 
@@ -110,6 +117,11 @@ General
 
   .. __: https://reuse.software/spec/
   .. __: https://spdx.org/ids
+
+:ref:`debops.nginx` role
+''''''''''''''''''''''''
+
+- TLSv1.3 is now enabled by default for nginx version 1.13.0 and up.
 
 :ref:`debops.owncloud` role
 '''''''''''''''''''''''''''
@@ -181,6 +193,12 @@ General
 - Use short timeout for DNS queries performed by the Ansible local fact script,
   in case that the DNS infrastructure is not configured. This avoids 60s
   timeouts during Ansible fact gathering in such cases.
+
+:ref:`debops.nginx` role
+''''''''''''''''''''''''
+
+- The role now always sets the HTTP Strict Transport Security header when it is
+  enabled, regardless of the response code.
 
 :ref:`debops.postgresql_server` role
 ''''''''''''''''''''''''''''''''''''
