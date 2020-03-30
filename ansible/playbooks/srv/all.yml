@@ -110,3 +110,5 @@
 - import_playbook: prometheus_server.yml
 
 - import_playbook: prometheus_exporter.yml
+
+- import_playbook: grafana.yml
