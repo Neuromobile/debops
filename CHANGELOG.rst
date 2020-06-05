@@ -36,7 +36,7 @@ New DebOps roles
 
 - The :ref:`debops.journald` role can be used to manage the
   :command:`systemd-journald` service, supports configuration of Forward Secure
-  Sealing and configures persistent storage of the log files. The role is
+  Sealing and can configure persistent storage of the log files. The role is
   included by default in the :file:`common.yml` playbook.
 
 - The :ref:`debops.dpkg_cleanup` role can create :command:`dpkg` hooks that
@@ -50,12 +50,20 @@ New DebOps roles
 
   .. __: https://influxdata.com/
 
+- The :ref:`debops.influxdb_server` and :ref:`debops.influxdb` roles can be
+  used to install the InfluxDB time series database service and manage its
+  databases and users, respectively.
+
 :ref:`debops.pki` role
 ''''''''''''''''''''''
 
 - The role can now instruct acme-tiny to register an ACME account with one or
   more contact URLs. Let's Encrypt for example uses this information to notify
   you about expiring certificates and emergency revocation.
+
+- The :ref:`debops.dovecot` and :ref:`debops.postfix` roles now include the PKI
+  hook scripts which will reload their corresponding services when the X.509
+  certificates used by them are changed.
 
 :ref:`debops.postconf` role
 '''''''''''''''''''''''''''
@@ -86,13 +94,38 @@ Updates of upstream application versions
 
 - In the :ref:`debops.ipxe` role, the Debian Stretch and Debian Buster netboot
   installer versions have been updated to their next point releases, 9.11 and
-  10.3 respectively.
+  10.4 respectively.
 
 - In the :ref:`debops.owncloud` role, the Nextcloud version installed by
-  default has been updated to ``v17.0``.
+  default has been updated to ``v17.0``. The ownCloud version has been updated
+  to ``v10.4``.
 
 - In the :ref:`debops.roundcube` role, the Roundcube version installed by
-  default has been updated to ``v1.4.2``.
+  default has been updated to ``v1.4.4``.
+
+- In the :ref:`debops.lxd` role, the LXD version installed by default has been
+  changed to the ``stable-4.0`` branch, which is a LTS release. The role uses
+  a :command:`git` branch instead of a specific tagged release to bypass
+  `broken LXD build dependency`__ which is not yet fixed in a tagged release.
+
+  .. __: https://github.com/lxc/lxd/issues/7357
+
+- In the :ref:`debops.gitlab` role, the GitLab release installed on Debian
+  Buster and newer OS releases is updated to ``12-10-stable``.
+
+  This release requires Golang packages from ``buster-backports`` APT
+  repository, which will be installed by default via the :ref:`debops.golang`
+  role. Existing installations need to upgrade the Golang packages before the
+  playbook is applied.
+
+- In the :ref:`debops.ansible` role, Ansible 2.9.x from the
+  ``buster-backports`` repository will be installed on Debian Buster by
+  default, when backports are enabled.
+
+- The :ref:`debops.mailman` role has been redesigned and now installs and
+  configures Mailman 3.x instead of Mailman 2.x. Read the
+  :ref:`mailman__ref_mailman2_migration` guide and the rest of the
+  :ref:`debops.mailman` documentation for details.
 
 Continuous Integration
 ''''''''''''''''''''''
@@ -118,10 +151,62 @@ General
   .. __: https://reuse.software/spec/
   .. __: https://spdx.org/ids
 
+- In new DebOps environments, Ansible will ignore any missing inventory groups
+  using the ``host_pattern_mismatch`` parameter. This will disable the "Could
+  not match supplied host pattern" warning message present in most of the
+  playbooks included in DebOps. To disable this message in an existing
+  environment, add in the :file:`.debops.cfg` configuration file:
+
+  .. code-block:: ini
+
+     [ansible inventory]
+     host_pattern_mismatch = ignore
+
+- The :command:`debops` script will now use the Ansible inventory path defined
+  in the :file:`.debops.cfg` configuration file ``[ansible defaults]`` section
+  instead of the static :file:`ansible/inventory/` path.
+
+:ref:`debops.cran` role
+'''''''''''''''''''''''
+
+- The custom ``cran`` Ansible module used by the role has been moved to the
+  :ref:`debops.ansible_plugins` role to allow it to be used via Ansible
+  Collection system, which requires all plugins to be centralized.
+
+:ref:`debops.etc_aliases` role
+''''''''''''''''''''''''''''''
+
+- The custom filter plugin used by the role has been moved to the
+  :ref:`debops.ansible_plugins` role to allow it to be used via Ansible
+  Collection system, which requires all plugins to be centralized.
+
+:ref:`debops.golang` role
+'''''''''''''''''''''''''
+
+- On Debian Buster, Golang APT packages from the ``buster-backports`` APT
+  repository will be preferred instead of their Buster version. This allows for
+  installation of applications that depend on a newer Go runtime environment,
+  like GitLab or MinIO.
+
+:ref:`debops.lxd` role
+''''''''''''''''''''''
+
+- The support for the LXC containers managed by the :ref:`debops.lxc` role will
+  be applied on the host when the LXD is configured, due to the build
+  dependency on the ``lxc`` APT package. In this case, the ``lxcbr0`` network
+  bridge will not be configured by default.
+
 :ref:`debops.nginx` role
 ''''''''''''''''''''''''
 
 - TLSv1.3 is now enabled by default for nginx version 1.13.0 and up.
+
+:ref:`debops.nullmailer` role
+'''''''''''''''''''''''''''''
+
+- The Nullmailer smtpd service can now listen on both IPv4 and IPv6 addresses.
+  It listens on both loopback addresses by default, where it used to only
+  listen on the IPv6 loopback address.
 
 :ref:`debops.owncloud` role
 '''''''''''''''''''''''''''
@@ -134,6 +219,20 @@ General
 - The persistent configuration stored on the Ansible Controller has been
   refactored and does not use multiple separate tasks to handle the JSON files.
 
+:ref:`debops.rsyslog` role
+''''''''''''''''''''''''''
+
+- The role has been refreshed and uses the custom Ansible filter plugins to
+  manage the :command:`rsyslog` configuration files. The default configuration
+  was rearranged, the :file:`/etc/rsyslog.conf` configuration file has the
+  default contents that come with the Debian package and can be configured by
+  the role. The configuration model has been redesigned; any changes in the
+  configuration of the role set in the Ansible inventory need to be reviewed
+  before applying the new version.
+
+- The ``rsyslog`` APT package and its service can be cleanly removed from the
+  host, either via the role or by uninstalling the package itself.
+
 Removed
 ~~~~~~~
 
@@ -143,6 +242,13 @@ Removed
 - The script and :command:`dpkg` hook that cleaned up the additional files
   maintained by the role has been removed; the :ref:`debops.dpkg_cleanup` role
   will be used for this purpose instead.
+
+:ref:`debops.core` role
+'''''''''''''''''''''''
+
+- The ``ansible_local.uuid`` local fact and corresponding variables and tasks
+  have been removed from the role. A replacement fact, ``ansible_machine_id``
+  is an Ansible built-in.
 
 Fixed
 ~~~~~
@@ -157,6 +263,16 @@ General
   to look for dependent roles.
 
   .. __: https://github.com/ansible/ansible/issues/67723
+
+- Fix an issue with the collection creation script where the role files that
+  contained multiple uses of a particular custom Ansible plugin, for example
+  ``template_src`` or ``file_src``, were modified multiple times by the script.
+
+:ref:`debops.cron` role
+'''''''''''''''''''''''
+
+- Fix creation of empty environment variables in :command:`cron` configuration
+  files managed by Ansible.
 
 :ref:`debops.ferm` role
 '''''''''''''''''''''''
@@ -177,6 +293,12 @@ General
                should be removed from the affected files before the role is
                applied. See the patch files in the role :file:`files/patches/`
                directory for more information.
+
+- The GitLab package repository signing key has been replaced with the new key
+  that has been in use since 2020-04-06, allowing APT to update package lists
+  again. See the `GitLab.com blog`__ for more information about this change.
+
+  .. __: https://about.gitlab.com/releases/2020/03/30/gpg-key-for-gitlab-package-repositories-metadata-changing/
 
 :ref:`debops.minio` role
 ''''''''''''''''''''''''
@@ -210,6 +332,13 @@ General
   directory.  This avoids the issue during execution of the script via
   :command:`cron` where it would emit errors about not being able to change to
   the :file:`/root/` home directory due to the permissions.
+
+:ref:`debops.roundcube` role
+''''''''''''''''''''''''''''
+
+- Use the Roundcube version from Ansible local facts instead of the one defined
+  in role default variables to detect if a database migration is required after
+  Roundcube :command:`git` repository is updated.
 
 :ref:`debops.slapd` role
 ''''''''''''''''''''''''
