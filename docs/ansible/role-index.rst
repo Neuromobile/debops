@@ -96,6 +96,7 @@ are not accessed directly by end users.
 - :ref:`debops.rabbitmq_server`
 - :ref:`debops.salt`
 - :ref:`debops.tinyproxy`
+- :ref:`debops.logstash`
 - ``debops.reprepro``
 - ``debops.sks``
 - ``debops.smstools``
@@ -206,6 +207,7 @@ Logging
 - :ref:`debops.elasticsearch`
 - :ref:`debops.journald`
 - :ref:`debops.kibana`
+- :ref:`debops.logstash`
 - :ref:`debops.logrotate`
 - :ref:`debops.rsyslog`
 
