@@ -35,10 +35,7 @@ opendkim__packages: []
 #
 # The version of the installed OpenDKIM service, gathered automatically by
 # Ansible local facts.
-opendkim__version: '{{ ansible_local.opendkim.version
-                       if (ansible_local|d() and ansible_local.opendkim|d() and
-                           ansible_local.opendkim.version|d())
-                       else "0.0.0" }}'
+opendkim__version: '{{ ansible_local.opendkim.version|d("0.0.0") }}'
                                                                    # ]]]
                                                                    # ]]]
 # Application environment, Postfix support [[[
@@ -71,10 +68,7 @@ opendkim__postfix_integration: '{{ ansible_local.postfix.installed
 # Name of the UNIX system group used by Postfix SMTP server. This variable is
 # used to create the OpenDKIM socket directory with correct access permissions
 # for Postfix.
-opendkim__postfix_group: '{{ ansible_local.postfix.system_group
-                             if (ansible_local|d() and ansible_local.postfix|d() and
-                                 ansible_local.postfix.system_group|d())
-                             else "postfix" }}'
+opendkim__postfix_group: '{{ ansible_local.postfix.system_group|d("postfix") }}'
 
                                                                    # ]]]
 # .. envvar:: opendkim__pidfile [[[
@@ -94,20 +88,14 @@ opendkim__socket: '{{ "/var/spool/postfix/opendkim/opendkim.sock"
 # .. envvar:: opendkim__domain [[[
 #
 # The main DNS domain used in the OpenDKIM configuration.
-opendkim__domain: '{{ ansible_local.core.domain
-                      if (ansible_local|d() and ansible_local.core|d() and
-                          ansible_local.core.domain|d())
-                      else ansible_domain }}'
+opendkim__domain: '{{ ansible_domain }}'
 
                                                                    # ]]]
 # .. envvar:: opendkim__fqdn [[[
 #
 # The Fully Qualified Domain Name of the current host used in the OpenDKIM
 # configuration.
-opendkim__fqdn: '{{ ansible_local.core.fqdn
-                    if (ansible_local|d() and ansible_local.core|d() and
-                        ansible_local.core.domain|d())
-                    else ansible_fqdn }}'
+opendkim__fqdn: '{{ ansible_fqdn }}'
 
                                                                    # ]]]
 # .. envvar:: opendkim__domainkeys_path [[[

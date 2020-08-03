@@ -4,16 +4,12 @@
 # Copyright (C) 2014-2017 DebOps <https://debops.org/>
 # SPDX-License-Identifier: GPL-3.0-only
 
+- import_role:
+    name: 'global_handlers'
+
 - name: Ensure that configuration is supported
   assert:
     that: not ntp__daemon or ntp__daemon in [ 'chrony', 'ntpd', 'ntpdate', 'openntpd', 'systemd-timesyncd' ]
-
-- name: Install required packages
-  package:
-    name: [ 'tzdata' ]
-    state: '{{ "present" if (ansible_local|d() and ansible_local.ntp|d()) else "latest" }}'
-  register: ntp__register_apt_tzdata
-  until: ntp__register_apt_tzdata is succeeded
 
 - name: Ensure that alternative daemons/programs are not installed
   apt:
@@ -26,9 +22,6 @@
   # Installs either ntpdate, NTPd, chrony or OpenNTPd on all hosts except inside containers
 - include: install.yml
   when: ntp__daemon_enabled|bool
-
-- include: timezone.yml
-  when: ntp__timezone|d()
 
 - name: Make sure that Ansible local facts directory exists
   file:

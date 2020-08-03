@@ -75,10 +75,7 @@ apt__remove_default_configuration: True
 #
 # Update APT cache early in the playbook if it's older than 24h
 # Set to False to disable update (useful when changing APT mirrors)
-apt__cache_valid_time: '{{ ansible_local.core.cache_valid_time
-                           if (ansible_local|d() and ansible_local.core|d() and
-                               ansible_local.core.cache_valid_time|d())
-                           else (60 * 60 * 24) }}'
+apt__cache_valid_time: '{{ ansible_local.core.cache_valid_time|d(60 * 60 * 24) }}'
 
                                                                    # ]]]
 # .. envvar:: apt__install_recommends [[[
@@ -107,6 +104,7 @@ apt__base_packages:
             [ "wheezy", "jessie", "stretch",
               "precise", "trusty", "xenial" ])
         else [] }}'
+  - 'gnupg'
 
                                                                    # ]]]
 # .. envvar:: apt__packages [[[
@@ -217,22 +215,14 @@ apt__architecture_map:
 #
 # The OS distribution present on the host.
 apt__distribution: '{{ ansible_local.core.distribution
-                       if (ansible_local|d() and ansible_local.core|d() and
-                           ansible_local.core.distribution|d())
-                       else (ansible_lsb.id
-                             if (ansible_lsb|d() and ansible_lsb.id|d())
-                             else ansible_distribution) }}'
+                       |d(ansible_lsb.id|d(ansible_distribution)) }}'
 
                                                                    # ]]]
 # .. envvar:: apt__distribution_release [[[
 #
 # The OS release present on the host.
 apt__distribution_release: '{{ ansible_local.core.distribution_release
-                              if (ansible_local|d() and ansible_local.core|d() and
-                                ansible_local.core.distribution_release|d())
-                            else ansible_lsb.codename
-                              if (ansible_lsb|d() and ansible_lsb.codename|d())
-                            else ansible_distribution_release }}'
+                               |d(ansible_lsb.codename|d(ansible_distribution_release)) }}'
 
                                                                    # ]]]
 # .. envvar:: apt__distribution_release_map [[[
@@ -397,12 +387,8 @@ apt__host_sources: []
 # using Ansible local facts.
 apt__original_sources:
   - comment: 'Original APT package sources gathered by Ansible'
-    uris: '{{ ansible_local.apt.original_mirrors_deb
-              if (ansible_local|d() and ansible_local.apt|d() and
-                  ansible_local.apt.original_mirrors_deb|d())
-              else [] }}'
-    state: '{{ "present" if (ansible_local|d() and ansible_local.apt|d() and
-                             ansible_local.apt.original_mirrors_deb|d() and
+    uris: '{{ ansible_local.apt.original_mirrors_deb|d([]) }}'
+    state: '{{ "present" if (ansible_local.apt.original_mirrors_deb|d() and
                              apt__distribution_suite != "archive")
                          else "absent" }}'
 
@@ -448,6 +434,7 @@ apt__default_sources:
     state:        '{{ apt__default_sources_state
                       if (apt__architecture in ["armhf"] and
                           ("cape_universal" in ansible_cmdline) or
+                          ("bone_capemgr.uboot_capemgr_enabled" in ansible_cmdline) or
                           ("bone_capemgr" in ansible_cmdline))
                       else "absent" }}'
 

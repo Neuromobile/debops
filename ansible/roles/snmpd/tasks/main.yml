@@ -7,6 +7,9 @@
     name: 'ansible_plugins'
 
 - import_role:
+    name: 'global_handlers'
+
+- import_role:
     name: 'secret'
 
 - name: Check if snmpd is installed
@@ -58,8 +61,7 @@
     daemon_reload: True
     name: 'snmpd.service'
     enabled: True
-  when: ((ansible_local|d() and ansible_local.init|d() and
-          ansible_local.init == "systemd") and not ansible_local.snmpd|d())
+  when: ((ansible_service_mgr == "systemd") and not ansible_local.snmpd|d())
 
 - name: Allow 'snmp' user access to /proc if needed
   user:
@@ -91,10 +93,7 @@
                                           ansible_local.snmpd.username)
                                       else lookup("pipe", "openssl rand -hex "
                                                   + (((snmpd_account_username_length | int) / 2) | int) | string) }}'
-    snmpd_account_local_password: '{{ ansible_local.snmpd.password
-                                      if (ansible_local|d() and ansible_local.snmpd|d() and
-                                          ansible_local.snmpd.password)
-                                      else lookup("pipe", "openssl rand -base64 " + snmpd_account_password_length) }}'
+    snmpd_account_local_password: '{{ ansible_local.snmpd.password|d(lookup("pipe", "openssl rand -base64 " + snmpd_account_password_length)) }}'
   no_log: True
 
 - name: Configure lldpd daemon variables

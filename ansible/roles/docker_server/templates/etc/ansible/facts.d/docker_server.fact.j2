@@ -1,4 +1,5 @@
 #!{{ ansible_python['executable'] }}
+# -*- coding: utf-8 -*-
 
 # Copyright (C) 2015-2019 Maciej Delmanowski <drybjed@gmail.com>
 # Copyright (C) 2019      Imre Jonk <mail@imrejonk.nl>
@@ -35,9 +36,7 @@ def cmd_abspath(cmd):
 
 output = loads('''{{
     {"upstream": (ansible_local.docker_server.upstream
-                  if (ansible_local|d() and
-                      ansible_local.docker_server|d() and
-                      ansible_local.docker_server.upstream|d())
+                  if (ansible_local.docker_server.upstream|d())
                   else docker_server__upstream) | bool
     } | to_json }}''')
 

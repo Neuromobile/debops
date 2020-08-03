@@ -15,6 +15,36 @@ perform the upgrades between different stable releases.
 Unreleased
 ----------
 
+Changes in the OpenLDAP support
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- The list of the OpenLDAP overlays configured by the :ref:`debops.slapd` role
+  has been modified. This change cannot be applied cleanly on an existing
+  OpenLDAP server and will require re-initialization of the service - an
+  easiest way is reinstallation of the host and import of the existing
+  directory. Check the :ref:`slapd__ref_backup_restore` documentation for more
+  details and restore instructions.
+
+- The :file:`mailservice.schema` and the :file:`eduperson.schema` LDAP schemas
+  have been modified. Changes will not be applied automatically on existing
+  installations and it is recommended to re-create the directory from scratch
+  to apply new schema cleanly.
+
+
+v2.1.0 (2020-06-21)
+-------------------
+
+Inventory variable changes
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Some variables in the :ref:`debops.ntp` role have been removed:
+
+  +-------------------+----------------------------+---------------+
+  | Old variable name | New variable name          | Changed value |
+  +===================+============================+===============+
+  | ``ntp__timezone`` | :envvar:`tzdata__timezone` | No            |
+  +-------------------+----------------------------+---------------+
+
 
 v2.0.0 (2020-01-30)
 -------------------
@@ -160,7 +190,7 @@ Inventory variable changes
 
   This will remove the installation and source directories, after which the
   role should be able to install Roundcube without issues. Remember to create
-  backups in case of errors, epsecially if you use the SQLite database as
+  backups in case of errors, especially if you use the SQLite database as
   backend since by default it is located inside of the installation directory.
 
 
@@ -346,11 +376,11 @@ NodeJS and NPM changes
 - By default, the :ref:`debops.nodejs` role will install the NodeJS and NPM
   packages from the OS (Debian or Ubuntu) repositories. On the Debian Oldstable
   release (currently Stretch), the packages backported from the Stable release
-  will be used. The role supports an automatic upgrade to the upstrean NodeJS
+  will be used. The role supports an automatic upgrade to the upstream NodeJS
   package when the support for NodeSource repositories is enabled using the
   :envvar:`nodejs__node_upstream` variable.
 
-  On existing installations, status of the upstream APT repositorie should be
+  On existing installations, status of the upstream APT repository should be
   preserved, however note that the Ansible local fact name that tracks this has
   been changed to ``ansible_local.nodejs.node_upstream``, along with the
   default variable name. You might want to update the Ansible inventory to
@@ -366,7 +396,7 @@ Inventory variable changes
   The configuration of the hosts to back up has also been redesigned; the role
   does not use Ansible inventory groups to define the hosts to back up
   implicitly; you now have to explicitly specify hosts to back up using the
-  :ref:`rsnapshot__ref_hosts` variables. There is a way to replocate the
+  :ref:`rsnapshot__ref_hosts` variables. There is a way to replicate the
   previous usage of inventory groups to define hosts to back up as well, see
   the provided examples.
 
@@ -697,7 +727,7 @@ Inventory variable changes
 - The :ref:`debops.grub` role was redesigned, most of the ``grub_*`` default
   variables have been removed and the new configuration method has been
   implemented. The role variables have been namespaced, the role now uses
-  ``grub__*`` variabe naming scheme. Check the role documentation for details
+  ``grub__*`` variable naming scheme. Check the role documentation for details
   about configuring GRUB via Ansible inventory.
 
 - Variables related to :command:`dhcp_probe` in the :ref:`debops.dhcpd` role
@@ -979,7 +1009,7 @@ X.509 certificate changes
 Role changes
 ~~~~~~~~~~~~
 
-- The :ref:`debops.debops` role now uses the :ref:`debops.ansible` role to
+- The ``debops.debops`` role now uses the :ref:`debops.ansible` role to
   install Ansible instead of doing it by itself. The relevant code has been
   removed, see the :ref:`debops.ansible` role documentation for new variables.
 

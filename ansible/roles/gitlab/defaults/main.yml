@@ -56,10 +56,7 @@ gitlab__release_map:
 #
 # Specify the OS release which is used to select the version of GitLab to
 # install and APT package names.
-gitlab__distribution_release: '{{ ansible_local.core.distribution_release
-                                  if (ansible_local|d() and ansible_local.core|d() and
-                                      ansible_local.core.distribution_release|d())
-                                  else ansible_distribution_release }}'
+gitlab__distribution_release: '{{ ansible_local.core.distribution_release|d(ansible_distribution_release) }}'
 
                                                                    # ]]]
 # .. envvar:: gitlab__release [[[
@@ -91,8 +88,7 @@ gitlab_version: '{{ gitlab__release | replace("-stable","") | replace("-",".") }
 # documentation of the :ref:`debops.postgresql_server` role for information about
 # its features.
 gitlab__database: '{{ ansible_local.gitlab.database
-                      if (ansible_local|d() and ansible_local.gitlab|d() and
-                          ansible_local.gitlab.database|d())
+                      if (ansible_local.gitlab.database|d())
                       else ("postgresql"
                             if (ansible_local|d() and ansible_local.postgresql is defined)
                             else ("mariadb-is-deprecated"
@@ -106,11 +102,9 @@ gitlab__database: '{{ ansible_local.gitlab.database
 # init script provided by GitLab. By default the init script will be used on
 # non-systemd hosts.
 gitlab_use_systemd: '{{ (ansible_local.gitlab.systemd_services
-                         if (ansible_local|d() and ansible_local.gitlab|d() and
-                             ansible_local.gitlab.systemd_services|d())
+                         if (ansible_local.gitlab.systemd_services|d())
                          else (False
-                               if (ansible_local|d() and ansible_local.gitlab|d() and
-                                   ansible_local.gitlab.installed|d())
+                               if (ansible_local.gitlab.installed|d())
                                else (True if ansible_service_mgr == "systemd" else False))) }}'
 
                                                                    # ]]]
@@ -135,10 +129,7 @@ gitlab__fqdn: 'code.{{ gitlab_domain }}'
 #
 # Domain which will be used for nginx server and gitlab-shell access
 # GitLab will be configured with HTTPS enabled by default
-gitlab_domain: '{{ ansible_local.core.domain
-                   if (ansible_local|d() and ansible_local.core|d() and
-                       ansible_local.core.domain|d())
-                   else ansible_domain }}'
+gitlab_domain: '{{ ansible_domain }}'
                                                                    # ]]]
                                                                    # ]]]
 # APT packages [[[
@@ -371,28 +362,19 @@ gitlab_backup_exclude: []
 # .. envvar:: gitlab_redis_host [[[
 #
 # Define hostname of redis server to use.
-gitlab_redis_host: '{{ ansible_local.redis_server.host
-                       if (ansible_local|d() and ansible_local.redis_server|d() and
-                           ansible_local.redis_server.host|d())
-                       else "localhost" }}'
+gitlab_redis_host: '{{ ansible_local.redis_server.host|d("localhost") }}'
 
                                                                    # ]]]
 # .. envvar:: gitlab_redis_port [[[
 #
 # Define port of redis server to use.
-gitlab_redis_port: '{{ ansible_local.redis_server.port
-                       if (ansible_local|d() and ansible_local.redis_server|d() and
-                           ansible_local.redis_server.port|d())
-                       else "6379" }}'
+gitlab_redis_port: '{{ ansible_local.redis_server.port|d("6379") }}'
 
                                                                    # ]]]
 # .. envvar:: gitlab_redis_password [[[
 #
 # Define the Redis authentication password to use
-gitlab_redis_password: '{{ ansible_local.redis_server.password
-                           if (ansible_local|d() and ansible_local.redis_server|d() and
-                               ansible_local.redis_server.password|d())
-                           else "" }}'
+gitlab_redis_password: '{{ ansible_local.redis_server.password|d("") }}'
 
                                                                    # ]]]
 # .. envvar:: gitlab_redis_resque [[[
@@ -415,91 +397,71 @@ gitlab_redis_database: '0'
 # .. envvar:: gitlab_home [[[
 #
 # Home directory
-gitlab_home: '{{ (ansible_local.root.home
-                  if (ansible_local|d() and ansible_local.root|d() and
-                      ansible_local.root.home|d())
-                  else "/var/local") + "/" + gitlab_user }}'
+gitlab_home: '{{ (ansible_local.fhs.home | d("/var/local"))
+                 + "/" + gitlab_user }}'
 
                                                                    # ]]]
 # .. envvar:: gitlab_app_root_path [[[
 #
 # Application installation directory
-gitlab_app_root_path: '{{ (ansible_local.root.app
-                           if (ansible_local|d() and ansible_local.root|d() and
-                               ansible_local.root.app|d())
-                           else "/var/local") + "/" + gitlab_user }}'
+gitlab_app_root_path: '{{ (ansible_local.fhs.app | d("/var/local"))
+                          + "/" + gitlab_user }}'
 
                                                                    # ]]]
 # .. envvar:: gitlab_repositories_path [[[
 #
 # GitLab repositories
-gitlab_repositories_path: '{{ (ansible_local.root.data
-                               if (ansible_local|d() and ansible_local.root|d() and
-                                   ansible_local.root.data|d())
-                               else "/srv") + "/gitlab/repositories" }}'
+gitlab_repositories_path: '{{ (ansible_local.fhs.data | d("/srv"))
+                              + "/gitlab/repositories" }}'
 
                                                                    # ]]]
 # .. envvar:: gitlab_satellites_path [[[
 #
 # GitLab satellites
-gitlab_satellites_path: '{{ (ansible_local.root.data
-                             if (ansible_local|d() and ansible_local.root|d() and
-                                 ansible_local.root.data|d())
-                             else "/srv") + "/gitlab/satellites" }}'
+gitlab_satellites_path: '{{ (ansible_local.fhs.data | d("/srv"))
+                            + "/gitlab/satellites" }}'
 
                                                                    # ]]]
 # .. envvar:: gitlab_backup_path [[[
 #
 # Backup path
-gitlab_backup_path: '{{ (ansible_local.root.backup
-                         if (ansible_local|d() and ansible_local.root|d() and
-                             ansible_local.root.backup|d())
-                         else "/var/backups") + "/gitlab" }}'
+gitlab_backup_path: '{{ (ansible_local.fhs.backup | d("/var/backups"))
+                        + "/gitlab" }}'
 
                                                                    # ]]]
 # .. envvar:: gitlab_src_path [[[
 #
 # GitLab sources root path
-gitlab_src_path: '{{ (ansible_local.root.src
-                      if (ansible_local|d() and ansible_local.root|d() and
-                          ansible_local.root.src|d())
-                      else "/usr/local/src") + "/gitlab" }}'
+gitlab_src_path: '{{ (ansible_local.fhs.src | d("/usr/local/src"))
+                     + "/gitlab" }}'
 
                                                                    # ]]]
 # .. envvar:: gitlab_lfs_path [[[
 #
 # Gitlab path for lfs objects
-gitlab_lfs_path: '{{ (ansible_local.root.data
-                      if (ansible_local|d() and ansible_local.root|d() and
-                          ansible_local.root.data|d())
-                      else "/srv") + "/gitlab/shared/lfs-objects" }}'
+gitlab_lfs_path: '{{ (ansible_local.fhs.data | d("/srv"))
+                     + "/gitlab/shared/lfs-objects" }}'
 
                                                                    # ]]]
 # .. envvar:: gitlab_shared_path [[[
 #
 # Gitlab path for shared files
-gitlab_shared_path: '{{ (ansible_local.root.data
-                         if (ansible_local|d() and ansible_local.root|d() and
-                             ansible_local.root.data|d())
-                         else "/srv") + "/gitlab/shared" }}'
+gitlab_shared_path: '{{ (ansible_local.fhs.data | d("/srv"))
+                        + "/gitlab/shared" }}'
 
                                                                    # ]]]
 # .. envvar:: gitlab_artifacts_path [[[
 #
 # Gitlab path for artifacts files
-gitlab_artifacts_path: '{{ (ansible_local.root.data
-                            if (ansible_local|d() and ansible_local.root|d() and
-                                ansible_local.root.data|d())
-                            else "/srv") + "/gitlab/shared/artifacts" }}'
+gitlab_artifacts_path: '{{ (ansible_local.fhs.data | d("/srv"))
+                           + "/gitlab/shared/artifacts" }}'
 
                                                                    # ]]]
 # .. envvar:: gitlab_pages_path [[[
 #
 # Path where GitLab Pages are stored in the filesystem.
-gitlab_pages_path: '{{ (ansible_local.root.data
-                        if (ansible_local|d() and ansible_local.root|d() and
-                            ansible_local.root.data|d())
-                        else "/srv") + "/gitlab/shared/pages" }}'
+gitlab_pages_path: '{{ (ansible_local.fhs.data | d("/srv"))
+                       + "/gitlab/shared/pages" }}'
                                                                    # ]]]
                                                                    # ]]]
 # System user, group, additional groups [[[
@@ -781,10 +743,7 @@ gitlab__ldap_enabled: '{{ True
 # The base Distinguished Name which should be used to create Distinguished
 # Names of the LDAP directory objects, defined as a YAML list. If this variable
 # is empty, LDAP configuration will not be generated.
-gitlab__ldap_base_dn: '{{ ansible_local.ldap.base_dn
-                          if (ansible_local|d() and ansible_local.ldap|d() and
-                              ansible_local.ldap.base_dn|d())
-                          else [] }}'
+gitlab__ldap_base_dn: '{{ ansible_local.ldap.base_dn|d([]) }}'
 
                                                                    # ]]]
 # .. envvar:: gitlab__ldap_device_dn [[[
@@ -793,10 +752,7 @@ gitlab__ldap_base_dn: '{{ ansible_local.ldap.base_dn
 # list. It will be used as a base for the GitLab service account LDAP object.
 # If the list is empty, the role will not create the account LDAP object
 # automatically.
-gitlab__ldap_device_dn: '{{ ansible_local.ldap.device_dn
-                            if (ansible_local|d() and ansible_local.ldap|d() and
-                                ansible_local.ldap.device_dn|d())
-                            else [] }}'
+gitlab__ldap_device_dn: '{{ ansible_local.ldap.device_dn|d([]) }}'
 
                                                                    # ]]]
 # .. envvar:: gitlab__ldap_self_rdn [[[
@@ -855,19 +811,13 @@ gitlab__ldap_label: 'LDAP'
 # .. envvar:: gitlab__ldap_host [[[
 #
 # FQDN address of the LDAP server to connect to.
-gitlab__ldap_host: '{{ (ansible_local.ldap.hosts
-                        if (ansible_local|d() and ansible_local.ldap|d() and
-                            ansible_local.ldap.hosts|d())
-                        else [""]) | first }}'
+gitlab__ldap_host: '{{ ansible_local.ldap.hosts|d([""]) | first }}'
 
                                                                    # ]]]
 # .. envvar:: gitlab__ldap_port [[[
 #
 # The LDAP service port to use for connections.
-gitlab__ldap_port: '{{ ansible_local.ldap.port
-                       if (ansible_local|d() and ansible_local.ldap|d() and
-                           ansible_local.ldap.port|d())
-                       else "389" }}'
+gitlab__ldap_port: '{{ ansible_local.ldap.port|d("389") }}'
 
                                                                    # ]]]
 # .. envvar:: gitlab__ldap_encryption [[[
@@ -993,10 +943,7 @@ gitlab__registry_enabled: '{{ True
 # GitLab users when configuring the Container Registry for their projects in
 # the Gitlab UI. The Docker Registry needs to be reachable on a separate DNS
 # subdomain, because GitLab does not proxy the connections to the service.
-gitlab__registry_host_fqdn: '{{ ansible_local.docker_registry.host_fqdn
-                                if (ansible_local|d() and ansible_local.docker_registry|d() and
-                                    ansible_local.docker_registry.host_fqdn|d())
-                                else ("registry." + gitlab_domain) }}'
+gitlab__registry_host_fqdn: '{{ ansible_local.docker_registry.host_fqdn|d(("registry." + gitlab_domain)) }}'
 
                                                                    # ]]]
 # .. envvar:: gitlab__registry_host_port [[[
@@ -1006,20 +953,14 @@ gitlab__registry_host_fqdn: '{{ ansible_local.docker_registry.host_fqdn
 # Registry section of the GitLab interface. Docker Registry published behind
 # a HTTPS reverse proxy does not need to advertise its port, 443 (HTTPS) will
 # be used automatically by Docker clients.
-gitlab__registry_host_port: '{{ ansible_local.docker_registry.host_port
-                                if (ansible_local|d() and ansible_local.docker_registry|d() and
-                                    ansible_local.docker_registry.host_port|d())
-                                else "5005" }}'
+gitlab__registry_host_port: '{{ ansible_local.docker_registry.host_port|d("5005") }}'
 
                                                                    # ]]]
 # .. envvar:: gitlab__registry_api_url [[[
 #
 # The internal URL to the Docker Registry API endpoint.
 # Will be used by GitLab to directly communicate with the Registry API.
-gitlab__registry_api_url: '{{ ansible_local.docker_registry.api_url
-                              if (ansible_local|d() and ansible_local.docker_registry|d() and
-                                  ansible_local.docker_registry.api_url|d())
-                              else "http://localhost:5000" }}'
+gitlab__registry_api_url: '{{ ansible_local.docker_registry.api_url|d("http://localhost:5000") }}'
 
                                                                    # ]]]
 # .. envvar:: gitlab__registry_path [[[
@@ -1057,10 +998,7 @@ gitlab__registry_token_service: 'container_registry'
 # .. envvar:: gitlab__registry_pki_path [[[
 #
 # The base path of the PKI managed by the :ref:`debops.pki` Ansible role.
-gitlab__registry_pki_path: '{{ ansible_local.pki.path
-                               if (ansible_local|d() and ansible_local.pki|d() and
-                                   ansible_local.pki.path|d())
-                               else "/etc/pki/realms" }}'
+gitlab__registry_pki_path: '{{ ansible_local.pki.path|d("/etc/pki/realms") }}'
 
                                                                    # ]]]
 # .. envvar:: gitlab__registry_pki_realm [[[
@@ -1068,10 +1006,7 @@ gitlab__registry_pki_path: '{{ ansible_local.pki.path
 # The name of the PKI realm which should be used to sign the GitLab Container
 # Registry tokens. The Docker Registry will use the certificate in a given PKI
 # realm to authenticate the signatures.
-gitlab__registry_pki_realm: '{{ ansible_local.pki.realm
-                                if (ansible_local|d() and ansible_local.pki|d() and
-                                    ansible_local.pki.realm|d())
-                                else "domain" }}'
+gitlab__registry_pki_realm: '{{ ansible_local.pki.realm|d("domain") }}'
 
                                                                    # ]]]
 # .. envvar:: gitlab__registry_pki_key [[[

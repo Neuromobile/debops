@@ -56,10 +56,8 @@ hashicorp__group: 'hashicorp'
 # .. envvar:: hashicorp__home [[[
 #
 # Path to the home directory of the HashiCorp_ account.
-hashicorp__home: '{{ (ansible_local.root.home
-                      if (ansible_local|d() and ansible_local.root|d() and
-                          ansible_local.root.home|d())
-                      else "/var/local") + "/" + hashicorp__user }}'
+hashicorp__home: '{{ (ansible_local.fhs.home | d("/var/local"))
+                     + "/" + hashicorp__user }}'
 
                                                                    # ]]]
 # .. envvar:: hashicorp__comment [[[
@@ -89,10 +87,7 @@ hashicorp__gpg_key_id: '91A6 E7F8 5D05 C656 30BE F189 5185 2D87 348F FC4C'
 # .. envvar:: hashicorp__keyserver [[[
 #
 # URL of the OpenPGP keyserver used to obtain the HashiCorp_ OpenPGP key.
-hashicorp__keyserver: '{{ ansible_local.core.keyserver
-                          if (ansible_local|d() and ansible_local.core|d() and
-                              ansible_local.core.keyserver|d())
-                          else "hkp://pool.sks-keyservers.net" }}'
+hashicorp__keyserver: '{{ ansible_local.core.keyserver|d("hkp://pool.sks-keyservers.net") }}'
                                                                    # ]]]
                                                                    # ]]]
 # HashiCorp Application lists [[[
@@ -193,10 +188,8 @@ hashicorp__combined_binary_map: '{{ hashicorp__default_binary_map
 #
 # Base path to the directory with HashiCorp_ binary archives, their hash
 # signatures and OpenPGP signatures.
-hashicorp__src: '{{ (ansible_local.root.src
-                     if (ansible_local|d() and ansible_local.root|d() and
-                         ansible_local.root.src|d())
-                     else "/usr/local/src") + "/" + hashicorp__user + "/" +
+hashicorp__src: '{{ (ansible_local.fhs.src | d("/usr/local/src"))
+                    + "/" + hashicorp__user + "/" +
                      (hashicorp__base_url.split("://")|last | split("/") | first) }}'
 
                                                                    # ]]]
@@ -204,20 +197,15 @@ hashicorp__src: '{{ (ansible_local.root.src
 #
 # Base path to the directory where HashiCorp_ archives are unpacked after
 # verification.
-hashicorp__lib: '{{ (ansible_local.root.lib
-                     if (ansible_local|d() and ansible_local.root|d() and
-                         ansible_local.root.lib|d())
-                     else "/usr/local/lib") + "/" + hashicorp__user }}'
+hashicorp__lib: '{{ (ansible_local.fhs.lib | d("/usr/local/lib"))
+                    + "/" + hashicorp__user }}'
 
                                                                    # ]]]
 # .. envvar:: hashicorp__bin [[[
 #
 # Base path to the directory where HashiCorp_ application binaries will be
 # installed by the ``root`` account.
-hashicorp__bin: '{{ (ansible_local.root.bin
-                     if (ansible_local|d() and ansible_local.root|d() and
-                         ansible_local.root.bin|d())
-                     else "/usr/local/bin") }}'
+hashicorp__bin: '{{ ansible_local.fhs.bin | d("/usr/local/bin") }}'
                                                                    # ]]]
                                                                    # ]]]
 # HashiCorp application repositories [[[
@@ -282,10 +270,7 @@ hashicorp__sig_suffix: '{{ hashicorp__hash_suffix + ".sig" }}'
 # Boolean variable which controls if the Consul Web UI should be installed
 # alongside ``consul``. By default the Web UI files are not installed to allow
 # headless installation.
-hashicorp__consul_webui: '{{ (ansible_local.hashicorp.consul_webui
-                              if (ansible_local|d() and ansible_local.hashicorp|d() and
-                                  ansible_local.hashicorp.consul_webui|d())
-                              else False) | bool }}'
+hashicorp__consul_webui: '{{ ansible_local.hashicorp.consul_webui|d(False) | bool }}'
 
                                                                    # ]]]
 # .. envvar:: hashicorp__consul_webui_suffix [[[
@@ -297,10 +282,7 @@ hashicorp__consul_webui_suffix: 'web_ui.zip'
 # .. envvar:: hashicorp__consul_webui_path [[[
 #
 # Absolute path where the Consul Web UI files should be installed.
-hashicorp__consul_webui_path: '{{ (ansible_local.nginx.www
-                                   if (ansible_local|d() and ansible_local.nginx|d()
-                                       and ansible_local.nginx.www|d())
-                                   else "/srv/www") + "/consul/sites/public" }}'
+hashicorp__consul_webui_path: '{{ ansible_local.nginx.www|d("/srv/www") + "/consul/sites/public" }}'
                                                                    # ]]]
                                                                    # ]]]
 # Configuration for other Ansible roles [[[

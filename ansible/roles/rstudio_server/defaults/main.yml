@@ -32,10 +32,8 @@ rstudio_server__rstudio_in_apt: '{{ True
 # .. envvar:: rstudio_server__src [[[
 #
 # Directory where downloaded packages will be stored.
-rstudio_server__src: '{{ (ansible_local.root.src
-                          if (ansible_local|d() and ansible_local.root|d() and
-                              ansible_local.root.src|d())
-                          else "/usr/local/src") + "/" + rstudio_server__user }}'
+rstudio_server__src: '{{ (ansible_local.fhs.src | d("/usr/local/src"))
+                         + "/" + rstudio_server__user }}'
 
                                                                    # ]]]
 # .. envvar:: rstudio_server__release_deb_map [[[
@@ -114,10 +112,8 @@ rstudio_server__group: 'rstudio-server'
 # .. envvar:: rstudio_server__home [[[
 #
 # RStudio Server home directory.
-rstudio_server__home: '{{ (ansible_local.root.home
-                           if (ansible_local|d() and ansible_local.root|d() and
-                               ansible_local.root.home|d())
-                           else "/var/local") + "/" + rstudio_server__user }}'
+rstudio_server__home: '{{ (ansible_local.fhs.home | d("/var/local"))
+                          + "/" + rstudio_server__user }}'
 
                                                                    # ]]]
 # .. envvar:: rstudio_server__shell [[[
@@ -194,10 +190,7 @@ rstudio_server__session_timeout: '120'
 #
 # The URL of the Comprehensive R Archive Network mirror which should be used by
 # RStudio Server.
-rstudio_server__cran_mirror: '{{ ansible_local.cran.mirror
-                                 if (ansible_local|d() and ansible_local.cran|d() and
-                                     ansible_local.cran.mirror|d())
-                                 else "https://cloud.r-project.org/" }}'
+rstudio_server__cran_mirror: '{{ ansible_local.cran.mirror|d("https://cloud.r-project.org/") }}'
                                                                    # ]]]
                                                                    # ]]]
 # RStudio Server configuration files [[[
@@ -237,10 +230,7 @@ rstudio_server__fqdn: 'rstudio.{{ rstudio_server__domain }}'
 # .. envvar:: rstudio_server__domain [[[
 #
 # The DNS domain on which RStudio Server will be available.
-rstudio_server__domain: '{{ ansible_local.core.domain
-                            if (ansible_local|d() and ansible_local.core|d() and
-                                ansible_local.core.domain|d())
-                            else ansible_domain }}'
+rstudio_server__domain: '{{ ansible_domain }}'
 
                                                                    # ]]]
 # .. envvar:: rstudio_server__upload_size [[[

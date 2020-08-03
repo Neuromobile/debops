@@ -66,10 +66,19 @@
     - role: environment
       tags: [ 'role::environment', 'skip::environment' ]
 
+    - role: resolvconf
+      tags: [ 'role::resolvconf', 'skip::resolvconf' ]
+
+    - role: netbase
+      tags: [ 'role::netbase', 'skip::netbase' ]
+
     - role: secret
       tags: [ 'role::secret', 'role::pki', 'role::pki:secret' ]
       secret_directories:
         - '{{ pki_env_secret_directories }}'
+
+    - role: fhs
+      tags: [ 'role::fhs', 'skip::fhs' ]
 
     - role: python
       tags: [ 'role::python', 'skip::python', 'role::netbase', 'role::ldap' ]
@@ -79,12 +88,6 @@
       python__dependent_packages2:
         - '{{ netbase__python__dependent_packages2 }}'
         - '{{ ldap__python__dependent_packages2 }}'
-
-    - role: resolvconf
-      tags: [ 'role::resolvconf', 'skip::resolvconf' ]
-
-    - role: netbase
-      tags: [ 'role::netbase', 'skip::netbase' ]
 
     - role: apt_preferences
       tags: [ 'role::apt_preferences', 'skip::apt_preferences' ]
@@ -99,6 +102,9 @@
 
     - role: apt
       tags: [ 'role::apt', 'skip::apt' ]
+
+    - role: tzdata
+      tags: [ 'role::tzdata', 'skip::tzdata' ]
 
     - role: etckeeper
       tags: [ 'role::etckeeper', 'skip::etckeeper' ]

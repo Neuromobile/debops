@@ -22,10 +22,7 @@
 # .. envvar:: etesync__domain [[[
 #
 # The DNS domain used by other variables in the ``debops.etesync`` role.
-etesync__domain: '{{ ansible_local.core.domain
-                     if (ansible_local|d() and ansible_local.core|d() and
-                         ansible_local.core.domain|d())
-                     else ansible_domain }}'
+etesync__domain: '{{ ansible_domain }}'
 
                                                                    # ]]]
 # .. envvar:: etesync__fqdn [[[
@@ -85,10 +82,8 @@ etesync__shell: '/usr/sbin/nologin'
 # .. envvar:: etesync__home [[[
 #
 # The EteSync account home directory.
-etesync__home: '{{ (ansible_local.root.home
-                   if (ansible_local|d() and ansible_local.root|d() and
-                       ansible_local.root.home|d())
-                   else "/var/local") + "/" + etesync__user }}'
+etesync__home: '{{ (ansible_local.fhs.home | d("/var/local"))
+                   + "/" + etesync__user }}'
 
                                                                    # ]]]
 # .. envvar:: etesync__etc [[[
@@ -100,28 +95,22 @@ etesync__etc: '/etc/etesync-server'
 # .. envvar:: etesync__src [[[
 #
 # Directory where the role stores EteSync version control sources.
-etesync__src: '{{ (ansible_local.root.src
-                  if (ansible_local|d() and ansible_local.root|d() and
-                      ansible_local.root.src|d())
-                  else "/usr/local/src") + "/" + etesync__user }}'
+etesync__src: '{{ (ansible_local.fhs.src | d("/usr/local/src"))
+                  + "/" + etesync__user }}'
 
                                                                    # ]]]
 # .. envvar:: etesync__lib [[[
 #
 # Directory where the EteSync server directory is located.
-etesync__lib: '{{ (ansible_local.root.lib
-                  if (ansible_local|d() and ansible_local.root|d() and
-                      ansible_local.root.lib|d())
-                  else "/usr/local/lib") + "/" + etesync__user }}'
+etesync__lib: '{{ (ansible_local.fhs.lib | d("/usr/local/lib"))
+                  + "/" + etesync__user }}'
 
                                                                    # ]]]
 # .. envvar:: etesync__data [[[
 #
 # Directory where EteSync data is stored.
-etesync__data: '{{ (ansible_local.root.data
-                   if (ansible_local|d() and ansible_local.root|d() and
-                       ansible_local.root.data|d())
-                   else "/srv") + "/" + etesync__user }}'
+etesync__data: '{{ (ansible_local.fhs.data | d("/srv"))
+                   + "/" + etesync__user }}'
                                                                    # ]]]
                                                                    # ]]]
 # Application sources and deployment [[[
@@ -209,8 +198,7 @@ etesync__config_secret_key_filepath: '{{ etesync__etc + "/secret.txt" }}'
 #
 # Name of the initial admin account created by the role.
 etesync__superuser_name: '{{ ansible_local.core.admin_users[0]
-                             if (ansible_local|d() and ansible_local.core|d() and
-                                 ansible_local.core.admin_users|d())
+                             if (ansible_local.core.admin_users|d())
                              else "admin" }}'
 
                                                                    # ]]]
@@ -218,8 +206,7 @@ etesync__superuser_name: '{{ ansible_local.core.admin_users[0]
 #
 # E-mail address of the initial admin account created by the role.
 etesync__superuser_email: '{{ ansible_local.core.admin_private_email[0]
-                              if (ansible_local|d() and ansible_local.core|d() and
-                                  ansible_local.core.admin_private_email|d())
+                              if (ansible_local.core.admin_private_email|d())
                               else ("root@" + etesync__domain) }}'
 
                                                                    # ]]]
@@ -295,10 +282,7 @@ etesync__max_file_size: '5'
 # .. envvar:: etesync__python_version [[[
 #
 # Python version, needed to refer to static files as installed by Python modules.
-etesync__python_version: '{{ ansible_local.python.version3
-                             if (ansible_local|d() and ansible_local.python|d() and
-                                 ansible_local.python.version3|d())
-                             else "3.x" }}'
+etesync__python_version: '{{ ansible_local.python.version3|d("3.x") }}'
 
                                                                    # ]]]
 # .. envvar:: etesync__http_psk_subpath_enabled [[[

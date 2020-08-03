@@ -250,10 +250,19 @@ stages:
     JANE_DIFF_PATTERN: '.*/roles/console/.*'
     JANE_LOG_PATTERN: '\[debops\.console\]'
 
+'controller role':
+  <<: *test_role_2nd_deps
+  variables:
+    JANE_TEST_FACT: 'controller.fact'
+    JANE_TEST_PLAY: '${DEBOPS_PLAYBOOKS}/service/controller.yml'
+    JANE_INVENTORY_GROUPS: 'debops_service_controller'
+    JANE_DIFF_PATTERN: '.*/roles/controller/.*'
+    JANE_LOG_PATTERN: '\[debops\.controller\]'
+
 'core role':
   <<: *test_role_no_deps
   variables:
-    JANE_TEST_FACT: 'core.fact root.fact tags.fact uuid.fact'
+    JANE_TEST_FACT: 'core.fact tags.fact'
     JANE_TEST_PLAY: '${DEBOPS_PLAYBOOKS}/service/core.yml'
     JANE_DIFF_PATTERN: '.*/roles/core/.*'
     JANE_LOG_PATTERN: '\[debops\.core\]'
@@ -297,15 +306,6 @@ stages:
 
 
 # --- d --- [[[2
-
-'debops role':
-  <<: *test_role_2nd_deps
-  variables:
-    JANE_TEST_FACT: 'debops.fact'
-    JANE_TEST_PLAY: '${DEBOPS_PLAYBOOKS}/service/debops.yml'
-    JANE_INVENTORY_GROUPS: 'debops_service_debops'
-    JANE_DIFF_PATTERN: '.*/roles/debops/.*'
-    JANE_LOG_PATTERN: '\[debops\.debops\]'
 
 # The 'debops_api' role is currently broken, needs to be updated.
 #'debops_api role':
@@ -549,6 +549,23 @@ stages:
     JANE_TEST_PLAY: '${DEBOPS_PLAYBOOKS}/service/ferm.yml'
     JANE_DIFF_PATTERN: '.*/roles/ferm/.*'
     JANE_LOG_PATTERN: '\[debops\.ferm\]'
+
+'fhs role':
+  <<: *test_role_no_deps
+  variables:
+    JANE_TEST_FACT: 'fhs.fact'
+    JANE_TEST_PLAY: '${DEBOPS_PLAYBOOKS}/service/fhs.yml'
+    JANE_DIFF_PATTERN: '.*/roles/fhs/.*'
+    JANE_LOG_PATTERN: '\[debops\.fhs\]'
+
+'filebeat role':
+  <<: *test_role_2nd_deps
+  variables:
+    JANE_TEST_FACT: 'filebeat.fact'
+    JANE_TEST_PLAY: '${DEBOPS_PLAYBOOKS}/service/filebeat.yml'
+    JANE_INVENTORY_GROUPS: 'debops_service_filebeat'
+    JANE_DIFF_PATTERN: '.*/roles/filebeat/.*'
+    JANE_LOG_PATTERN: '\[debops\.filebeat\]'
 
 'freeradius role':
   <<: *test_role_1st_deps
@@ -1790,6 +1807,14 @@ stages:
     JANE_INVENTORY_GROUPS: 'debops_service_tinyproxy'
     JANE_DIFF_PATTERN: '.*/roles/tinyproxy/.*'
     JANE_LOG_PATTERN: '\[debops\.tinyproxy\]'
+
+'tzdata role':
+  <<: *test_role_no_deps
+  variables:
+    JANE_TEST_FACT: 'tzdata.fact'
+    JANE_TEST_PLAY: '${DEBOPS_PLAYBOOKS}/service/tzdata.yml'
+    JANE_DIFF_PATTERN: '.*/roles/tzdata/.*'
+    JANE_LOG_PATTERN: '\[debops\.tzdata\]'
 
 # --- u --- [[[2
 

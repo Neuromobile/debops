@@ -64,10 +64,8 @@ etherpad_group: '{{ etherpad_system_name }}'
 # .. envvar:: etherpad_home [[[
 #
 # Home directory of Etherpad.
-etherpad_home: '{{ (ansible_local.root.app
-                    if (ansible_local|d() and ansible_local.root|d() and
-                        ansible_local.root.app|d())
-                    else "/var/local") + "/" + etherpad_user }}'
+etherpad_home: '{{ (ansible_local.fhs.app | d("/var/local"))
+                   + "/" + etherpad_user }}'
 
                                                                    # ]]]
 # .. envvar:: etherpad__shell [[[
@@ -79,19 +77,15 @@ etherpad__shell: '/usr/sbin/nologin'
 # .. envvar:: etherpad_src_dir [[[
 #
 # Etherpad sources root directory.
-etherpad_src_dir: '{{ (ansible_local.root.src
-                       if (ansible_local|d() and ansible_local.root|d() and
-                           ansible_local.root.src|d())
-                       else "/usr/local/src") + "/" + etherpad_system_name }}'
+etherpad_src_dir: '{{ (ansible_local.fhs.src | d("/usr/local/src"))
+                      + "/" + etherpad_system_name }}'
 
                                                                    # ]]]
 # .. envvar:: etherpad_log_dir [[[
 #
 # Path where Etherpad logs are stored.
-etherpad_log_dir: '{{ (ansible_local.root.log
-                       if (ansible_local|d() and ansible_local.root|d() and
-                           ansible_local.root.log|d())
-                       else "/var/log") + "/" + etherpad_system_name }}'
+etherpad_log_dir: '{{ (ansible_local.fhs.log | d("/var/log"))
+                      + "/" + etherpad_system_name }}'
                                                                    # ]]]
                                                                    # ]]]
 # Basic configuration [[[
@@ -101,8 +95,7 @@ etherpad_log_dir: '{{ (ansible_local.root.log
 #
 # Etherpad git version to install.
 etherpad_version: '{{ "1.7.0"
-                      if (ansible_local|d() and ansible_local.nodejs|d() and
-                          (ansible_local.nodejs.npm_version|d()) is version("6.4.0", "<"))
+                      if (ansible_local.nodejs.npm_version|d() is version("6.4.0", "<"))
                       else "1.7.5" }}'
 
                                                                    # ]]]
@@ -161,13 +154,7 @@ etherpad_welcome_text: |
 #
 # FQDN of the database host. It will be configured by
 # the :ref:`debops.mariadb` or :ref:`debops.postgresql` role.
-etherpad_database_server: '{{ ansible_local.mariadb.server
-                              if (ansible_local|d() and ansible_local.mariadb|d() and
-                                  ansible_local.mariadb.server|d())
-                              else (ansible_local.postgresql.server
-                                    if (ansible_local|d() and ansible_local.postgresql|d() and
-                                        ansible_local.postgresql.server|d())
-                                    else "") }}'
+etherpad_database_server: '{{ ansible_local.mariadb.server|d(ansible_local.postgresql.server|d("")) }}'
 
                                                                    # ]]]
 # .. envvar:: etherpad_database_user [[[
@@ -192,14 +179,14 @@ etherpad_database_password: "{{ lookup('password', secret + '/'
                                          if etherpad__database == 'postgres'
                                          else etherpad__database)) + '/'
                                 + (ansible_local.mariadb.delegate_to + '/'
-                                   if ansible_local|d() and ansible_local.mariadb|d() and ansible_local.mariadb.delegate_to|d()
+                                   if ansible_local.mariadb.delegate_to|d()
                                    else (ansible_local.postgresql.delegate_to + '/'
-                                         if ansible_local|d() and ansible_local.postgresql|d() and ansible_local.postgresql.delegate_to|d()
+                                         if ansible_local.postgresql.delegate_to|d()
                                          else ''))
                                 + (ansible_local.mariadb.port + '/'
-                                   if ansible_local|d() and ansible_local.mariadb|d() and ansible_local.mariadb.port|d()
+                                   if ansible_local.mariadb.port|d()
                                    else (ansible_local.postgresql.port + '/'
-                                         if ansible_local|d() and ansible_local.postgresql|d() and ansible_local.postgresql.port|d()
+                                         if ansible_local.postgresql.port|d()
                                          else ''))
                                 + '/credentials/' + etherpad_database_user + '/password length=48') }}"
 

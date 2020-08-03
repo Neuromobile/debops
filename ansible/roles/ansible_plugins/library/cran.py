@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # cran.py: install or remove R packages
 # Homepage: https://github.com/yutannihilation/ansible-module-cran
@@ -38,7 +39,7 @@ options:
     description:
       - The name of an R package.
     required: true
-    default null
+    default: null
   state:
     description:
       - The state of module

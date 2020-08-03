@@ -35,10 +35,7 @@ redis_server__packages: []
 #
 # The version of the installed Redis Server. It will be detected via Ansible
 # local facts, installed by the role.
-redis_server__version: '{{ ansible_local.redis_server.version
-                           if (ansible_local|d() and ansible_local.redis_server|d() and
-                               ansible_local.redis_server.version|d())
-                           else "0.0.0" }}'
+redis_server__version: '{{ ansible_local.redis_server.version|d("0.0.0") }}'
                                                                    # ]]]
                                                                    # ]]]
 # UNIX environment [[[
@@ -71,10 +68,7 @@ redis_server__auth_group: 'redis-auth'
 #
 # The DNS domain used in the role to configure Redis and Sentinel parameters,
 # primarly to retrieve the shared password.
-redis_server__domain: '{{ ansible_local.core.domain
-                          if (ansible_local|d() and ansible_local.core|d() and
-                              ansible_local.core.domain|d())
-                          else ansible_domain }}'
+redis_server__domain: '{{ ansible_domain }}'
 
                                                                    # ]]]
 # .. envvar:: redis_server__auth_password [[[
@@ -82,8 +76,7 @@ redis_server__domain: '{{ ansible_local.core.domain
 # The password used for authentication in Redis. The same password is used on
 # all nodes in the Redis/Sentinel cluster to simplify authentication.
 redis_server__auth_password: '{{ ansible_local.redis_server.password
-                                 if (ansible_local|d() and ansible_local.redis_server|d() and
-                                     ansible_local.redis_server.password|d())
+                                 if (ansible_local.redis_server.password|d())
                                  else (lookup("password", secret +
                                        "/redis/clusters/" + redis_server__domain +
                                        "/password length=" + redis_server__password_length +

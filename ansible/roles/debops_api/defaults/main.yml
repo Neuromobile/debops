@@ -80,10 +80,7 @@ debops_api__group: 'debops-api'
 # .. envvar:: debops_api__home [[[
 #
 # Home directory of the DebOps API user.
-debops_api__home: '{{ (ansible_local.nginx.www
-                      if (ansible_local|d() and ansible_local.nginx|d() and
-                          ansible_local.nginx.www|d())
-                      else "/srv/www") + "/" + debops_api__user }}'
+debops_api__home: '{{ ansible_local.nginx.www|d("/srv/www") + "/" + debops_api__user }}'
 
                                                                    # ]]]
 # .. envvar:: debops_api__public_api_dir [[[
@@ -102,10 +99,8 @@ debops_api__app_repo_url: 'https://github.com/debops/debops-api.git'
 # .. envvar:: debops_api__app_repo_path [[[
 #
 # Directory path where the DebOps API script repository will be installed.
-debops_api__app_repo_dest: '{{ (ansible_local.root.src
-                                if (ansible_local|d() and ansible_local.root|d() and
-                                    ansible_local.root.src|d())
-                                else "/usr/local/src") + "/debops-api" }}'
+debops_api__app_repo_dest: '{{ (ansible_local.fhs.src | d("/usr/local/src"))
+                               + "/debops-api" }}'
 
                                                                    # ]]]
 # .. envvar:: debops_api__input_data_repo_update [[[
@@ -124,10 +119,8 @@ debops_api__input_data_repo_url: 'https://github.com/debops/docs.git'
 # .. envvar:: debops_api__input_data_dir [[[
 #
 # Input data directory of the DebOps API.
-debops_api__input_data_dir: '{{ (ansible_local.root.var
-                                if (ansible_local|d() and ansible_local.root|d() and
-                                    ansible_local.root.var|d())
-                                else "/var/local") + "/debops-api" }}'
+debops_api__input_data_dir: '{{ (ansible_local.fhs.var | d("/var/local"))
+                                + "/debops-api" }}'
 
                                                                    # ]]]
 # .. envvar:: debops_api__input_data_repo_dest [[[

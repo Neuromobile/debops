@@ -87,6 +87,7 @@ infrastructure environments.
    user-guide/configuration
    user-guide/project-directories
    user-guide/scripts
+   user-guide/global-variables
    user-guide/custom-environment
    user-guide/playbooks
    ansible/role-index
@@ -119,6 +120,7 @@ infrastructure environments.
    :hidden:
 
    meta/community
+   meta/goals
    meta/policy
    meta/philosophy
    meta/timeline

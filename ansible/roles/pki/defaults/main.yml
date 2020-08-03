@@ -44,16 +44,6 @@ pki_internal: '{{ (True
                    else False) | bool }}'
 
                                                                    # ]]]
-# .. envvar:: pki_fqdn [[[
-#
-# Fully Qualified Domain Name of the remote host that is managed by
-# the ``debops.pki`` role. This variable is important in Ansible tasks that
-# maintain files in the :file:`secret/` directory, as well as correct
-# identification of hosts which should have certificates signed by the internal
-# Certificate Authority.
-pki_fqdn: '{{ ansible_fqdn }}'
-
-                                                                   # ]]]
 # .. envvar:: pki_inventory_groups [[[
 #
 # List of Ansible inventory group names which are taken into account while
@@ -199,10 +189,8 @@ pki_acme_tiny_version: 'master'
 # .. envvar:: pki_acme_tiny_src [[[
 #
 # Directory where :program:`acme-tiny` source code will be cloned into for deployment.
-pki_acme_tiny_src: '{{ (ansible_local.root.src
-                        if (ansible_local|d() and ansible_local.root|d() and
-                            ansible_local.root.src|d())
-                        else "/usr/local/src") + "/" + pki_acme_user }}'
+pki_acme_tiny_src: '{{ (ansible_local.fhs.src | d("/usr/local/src"))
+                       + "/" + pki_acme_user }}'
 
                                                                    # ]]]
 # .. envvar:: pki_acme_tiny_bin [[[
@@ -236,12 +224,7 @@ pki_acme_ca_api_map:
 # List of (mailto:) URLs that the ACME server can use to contact you for issues
 # related to your account. For example, the server may wish to notify you about
 # server-initiated revocation or certificate expiration.
-pki_acme_contacts: [ 'mailto:{{ ansible_local.core.admin_public_email[0]
-                                if (ansible_local|d() and
-                                    ansible_local.core|d() and
-                                    ansible_local.core.admin_public_email|d() and
-                                    ansible_local.core.admin_public_email[0]|d())
-                                else "root@" + ansible_domain }}' ]
+pki_acme_contacts: [ 'mailto:{{ ansible_local.core.admin_public_email[0]|d("root@" + ansible_domain) }}' ]
 
                                                                    # ]]]
 # .. envvar:: pki_acme_challenge_dir [[[
@@ -249,19 +232,15 @@ pki_acme_contacts: [ 'mailto:{{ ansible_local.core.admin_public_email[0]
 # Directory where the ACME client should store responses to ACME CA challenges.
 # By default it's defined by the ``debops.nginx`` Ansible role using Ansible
 # facts.
-pki_acme_challenge_dir: '{{ (ansible_local.nginx.acme_root
-                             if (ansible_local|d() and ansible_local.nginx|d() and
-                                 ansible_local.nginx.acme_root|d())
-                             else "/srv/www/sites/acme/public") +
-                             "/.well-known/acme-challenge" }}'
+pki_acme_challenge_dir: '{{ ansible_local.nginx.acme_root|d("/srv/www/sites/acme/public")
+                            + "/.well-known/acme-challenge" }}'
 
                                                                    # ]]]
 # .. envvar:: pki_create_acme_challenge_dir [[[
 #
 # Whether the directory where the ACME client should store responses
 # should be created.
-pki_create_acme_challenge_dir: '{{ True if (ansible_local|d() and ansible_local.nginx|d() and
-                                            ansible_local.nginx.acme|d() and
+pki_create_acme_challenge_dir: '{{ True if (ansible_local.nginx.acme|d() and
                                             ansible_local.nginx.acme|bool) else False }}'
                                                                    # ]]]
                                                                    # ]]]
@@ -412,10 +391,7 @@ pki_realm_key_size: '2048'
 # System-wide PKI realm which is used by services by default for server
 # certificates. It will be set in Ansible local facts for use by other Ansible
 # roles.
-pki_system_realm: '{{ ansible_local.pki.realm
-                      if (ansible_local|d() and ansible_local.pki|d() and
-                          ansible_local.pki.realm|d())
-                      else "domain" }}'
+pki_system_realm: '{{ ansible_local.pki.realm|d("domain") }}'
 
                                                                    # ]]]
 # .. envvar:: pki_system_ca_realm [[[
@@ -509,20 +485,16 @@ pki_scheduler_interval: 'weekly'
 # Specify if Diffie-Hellman parameters should be appended to the certificate
 # chain. This is required by applications that don't support DHE parameters in
 # a separate file like HAproxy, ZNC.
-pki_dhparam: '{{ (True
-                  if (ansible_local|d() and ansible_local.dhparam|d() and
-                      ansible_local.dhparam.default|d())
-                  else False) | bool }}'
+pki_dhparam: '{{ True
+                 if ansible_local.dhparam.default|d()
+                 else False }}'
 
                                                                    # ]]]
 # .. envvar:: pki_dhparam_file [[[
 #
 # Path to the Diffie-Hellman parameters file which will be appended to the
 # certificate chain, if specified.
-pki_dhparam_file: '{{ ansible_local.dhparam.default
-                      if (ansible_local|d() and ansible_local.dhparam|d() and
-                          ansible_local.dhparam.default)
-                      else "" }}'
+pki_dhparam_file: '{{ ansible_local.dhparam.default|d("") }}'
                                                                    # ]]]
                                                                    # ]]]
 # Internal Certificate Authorities [[[
@@ -679,7 +651,7 @@ pki_dependent_authorities: []
 # - ``by-group/{{ group_name }}`` - certificates copied to hosts in a specified
 #   inventory group;
 #
-# - ``by-host/{{ pki_fqdn }}`` - certificates copied to a specific host;
+# - ``by-host/{{ inventory_hostname }}`` - certificates copied to a specific host;
 #
 pki_ca_certificates_path: 'by-group/all'
                                                                    # ]]]

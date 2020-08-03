@@ -82,10 +82,7 @@ ldap__packages: []
 #
 # The DNS domain used to look for the LDAP servers and to create the LDAP Base
 # Distinguished Name (BaseDN) variables.
-ldap__domain: '{{ ansible_local.core.domain
-                  if (ansible_local|d() and ansible_local.core|d() and
-                      ansible_local.core.domain|d())
-                  else ansible_domain }}'
+ldap__domain: '{{ ansible_domain }}'
 
                                                                    # ]]]
 # .. envvar:: ldap__servers_srv_rr [[[
@@ -287,7 +284,7 @@ ldap__device_aliases: [ '{{ ansible_hostname }}' ]
 # attributes, if they are configured to be reachable from outside of the host.
 ldap__device_ip_addresses: '{{ q("template",
                                  "lookup/ldap__device_ip_addresses.j2")
-                                 | from_yaml }}'
+                                 | from_yaml | flatten }}'
 
                                                                    # ]]]
 # .. envvar:: ldap__device_mac_addresses [[[
@@ -298,9 +295,14 @@ ldap__device_ip_addresses: '{{ q("template",
 # Only the Ethernet network interfaces, or their equivalents in the virtual
 # machines or containers, will be included in the list. Any other types of
 # network devices will be skipped.
+#
+# The 'unique' filter is used here to prevent adding duplicate MAC addresses to
+# the device object. This could otherwise cause problems when the host employs
+# network bonding (where the MAC addresses of the physical interfaces can become
+# the same).
 ldap__device_mac_addresses: '{{ q("template",
                                   "lookup/ldap__device_mac_addresses.j2")
-                                  | from_yaml }}'
+                                  | from_yaml | flatten | unique }}'
 
                                                                    # ]]]
 # .. envvar:: ldap__device_self_rdn [[[
@@ -386,8 +388,8 @@ ldap__device_object_classes: '{{ [ "device", "ieee802Device", "ipHost" ]
 # well on any changes.
 ldap__device_attributes:
   cn: '{{ ([ ldap__device_self_rdn.split("=")[1] ] + ldap__device_aliases) | unique }}'
-  ipHostNumber: '{{ ldap__device_ip_addresses  | flatten }}'
-  macAddress:   '{{ ldap__device_mac_addresses | flatten }}'
+  ipHostNumber: '{{ ldap__device_ip_addresses }}'
+  macAddress:   '{{ ldap__device_mac_addresses }}'
   manager:      '{{ ldap__device_managers }}'
                                                                    # ]]]
                                                                    # ]]]
@@ -461,8 +463,7 @@ ldap__shell: '/bin/bash'
 ldap__default_urn_patterns:
 
   - '{{ ("deploy:" + ansible_local.machine.deployment)
-        if (ansible_local|d() and ansible_local.machine|d() and
-            ansible_local.machine.deployment|d())
+        if (ansible_local.machine.deployment|d())
         else [] }}'
 
                                                                    # ]]]

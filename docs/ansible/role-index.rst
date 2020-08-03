@@ -80,7 +80,7 @@ are not accessed directly by end users.
 
 - :ref:`debops.ansible`
 - :ref:`debops.apt_cacher_ng`
-- :ref:`debops.debops` - install DebOps on other hosts
+- :ref:`debops.controller` - install DebOps on other hosts
 - :ref:`debops.debops_api`
 - :ref:`debops.gitlab_runner`
 - :ref:`debops.fcgiwrap`
@@ -166,6 +166,7 @@ Ansible roles that manage filesystem-level services, or export filesystems to
 other hosts.
 
 - :ref:`debops.cryptsetup`
+- :ref:`debops.fhs`
 - :ref:`debops.iscsi`
 - :ref:`debops.lvm`
 - :ref:`debops.mcli`
@@ -205,6 +206,7 @@ Logging
 -------
 
 - :ref:`debops.elasticsearch`
+- :ref:`debops.filebeat`
 - :ref:`debops.journald`
 - :ref:`debops.kibana`
 - :ref:`debops.logstash`
@@ -316,6 +318,7 @@ System configuration
 - :ref:`debops.etc_services`
 - :ref:`debops.etckeeper`
 - :ref:`debops.ferm`
+- :ref:`debops.fhs`
 - :ref:`debops.keyring`
 - :ref:`debops.ldap`
 - :ref:`debops.locales`
@@ -335,6 +338,7 @@ System configuration
 - :ref:`debops.sysnews`
 - :ref:`debops.system_groups`
 - :ref:`debops.system_users`
+- :ref:`debops.tzdata`
 - :ref:`debops.users`
 - :ref:`debops.yadm`
 - ``debops.gitusers``
@@ -375,5 +379,6 @@ additional functions to other roles.
 - :ref:`debops.core`
 - :ref:`debops.debops_fact`
 - :ref:`debops.dpkg_cleanup`
+- :ref:`debops.global_handlers`
 - :ref:`debops.keyring`
 - :ref:`debops.secret`

@@ -64,10 +64,7 @@ librenms__fqdn: 'nms.{{ librenms__domain }}'
 # .. envvar:: librenms__domain [[[
 #
 # Default domain used by the LibreNMS service.
-librenms__domain: '{{ ansible_local.core.domain
-                      if (ansible_local|d() and ansible_local.core|d() and
-                          ansible_local.core.domain|d())
-                      else ansible_domain }}'
+librenms__domain: '{{ ansible_domain }}'
 
                                                                    # ]]]
 # .. envvar:: librenms__base_url [[[
@@ -94,10 +91,7 @@ librenms__nginx_access_policy: ''
 #
 # Name of the webserver user account which will be granted read only access to
 # the LibreNMS application directory.
-librenms__webserver_user: '{{ ansible_local.nginx.user
-                              if (ansible_local|d() and ansible_local.nginx|d() and
-                                  ansible_local.nginx.user|d())
-                              else "www-data" }}'
+librenms__webserver_user: '{{ ansible_local.nginx.user|d("www-data") }}'
                                                                    # ]]]
                                                                    # ]]]
 # Application user, group, directories [[[
@@ -124,10 +118,7 @@ librenms__shell: '/bin/bash'
 # .. envvar:: librenms__home [[[
 #
 # Home directory of the LibreNMS application.
-librenms__home: '{{ (ansible_local.nginx.www
-                     if (ansible_local|d() and ansible_local.nginx|d() and
-                         ansible_local.nginx.www|d())
-                     else "/srv/www") + "/" + librenms__user }}'
+librenms__home: '{{ ansible_local.nginx.www|d("/srv/www") + "/" + librenms__user }}'
 
                                                                    # ]]]
 # .. envvar:: librenms__install_path [[[
@@ -141,10 +132,8 @@ librenms__install_path: '{{ librenms__home + "/sites/public" }}'
 #
 # Path where LibreNMS application data is stored, this directory should be set
 # outside of the webserver root directory.
-librenms__data_path: '{{ (ansible_local.root.data
-                          if (ansible_local|d() and ansible_local.root|d() and
-                              ansible_local.root.data|d())
-                          else "/srv") + "/" + librenms__user }}'
+librenms__data_path: '{{ (ansible_local.fhs.data | d("/srv"))
+                         + "/" + librenms__user }}'
 
                                                                    # ]]]
 # .. envvar:: librenms__rrd_dir [[[
@@ -156,10 +145,8 @@ librenms__rrd_dir: '{{ librenms__data_path + "/rrd" }}'
 # .. envvar:: librenms__log_dir [[[
 #
 # Path where LibreNMS logs are stored.
-librenms__log_dir: '{{ (ansible_local.root.log
-                        if (ansible_local|d() and ansible_local.root|d() and
-                            ansible_local.root.log|d())
-                        else "/var/log") + "/librenms" }}'
+librenms__log_dir: '{{ (ansible_local.fhs.log | d("/var/log"))
+                       + "/librenms" }}'
 
                                                                    # ]]]
 # .. envvar:: librenms__config_mode [[[
@@ -233,10 +220,7 @@ librenms__database_password: "{{ lookup('password', secret + '/mariadb/' +
 #
 # Passwords will be automatically stored in ``secret/`` directory (see
 # ``debops.secret`` role for more details).
-librenms__admin_accounts: '{{ ansible_local.core.admin_users
-                              if (ansible_local|d() and ansible_local.core|d() and
-                                  ansible_local.core.admin_users|d())
-                              else [] }}'
+librenms__admin_accounts: '{{ ansible_local.core.admin_users|d([]) }}'
 
                                                                    # ]]]
 # .. envvar:: librenms__cron_threads [[[

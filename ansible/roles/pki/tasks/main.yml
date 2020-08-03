@@ -10,6 +10,9 @@
     name: 'ansible_plugins'
 
 - import_role:
+    name: 'global_handlers'
+
+- import_role:
     name: 'secret'
 
 - name: DebOps pre_tasks hook
@@ -24,11 +27,8 @@
 
 - name: Expose host FQDN and library path in temporary variables
   set_fact:
-    pki_fact_fqdn: '{{ pki_fqdn }}'
-    pki_fact_lib_path: '{{ (ansible_local.root.lib
-                            if (ansible_local|d() and ansible_local.root|d() and
-                                ansible_local.root.lib|d())
-                            else "/usr/local/lib") + "/pki" }}'
+    pki_fact_lib_path: '{{ (ansible_local.fhs.lib | d("/usr/local/lib"))
+                           + "/pki" }}'
 
 # Install PKI packages [[[
 - name: Install PKI packages
@@ -39,10 +39,7 @@
              | flatten }}'
     state: 'present'
     install_recommends: False
-    cache_valid_time: '{{ ansible_local.core.cache_valid_time
-                          if (ansible_local|d() and ansible_local.core|d() and
-                              ansible_local.core.cache_valid_time|d())
-                          else "86400" }}'
+    cache_valid_time: '{{ ansible_local.core.cache_valid_time|d("86400") }}'
   register: pki__register_packages
   until: pki__register_packages is succeeded
   when: pki_enabled | bool
@@ -213,7 +210,7 @@
 
     - name: Download private realm contents by host
       copy:
-        src: '{{ secret + "/pki/realms/by-host/" + pki_fqdn + "/" + item.name + "/private/" }}'
+        src: '{{ secret + "/pki/realms/by-host/" + inventory_hostname + "/" + item.name + "/private/" }}'
         dest: '/etc/pki/realms/{{ item.name }}/private/'
         owner: 'root'
         group: '{{ item.private_file_group | d(pki_private_group) }}'
@@ -305,7 +302,7 @@
   fetch:
     src: '/etc/pki/realms/{{ item.name }}/internal/request.pem'
     dest: '{{ secret + "/pki/requests/" + (item.authority | d(pki_default_authority)) +
-              "/" + pki_fqdn + "/" + item.name + "/request.pem" }}'
+              "/" + inventory_hostname + "/" + item.name + "/request.pem" }}'
     flat: True
   with_flattened:
     - '{{ pki_realms }}'
@@ -380,7 +377,7 @@
   environment:
     PKI_SESSION_TOKEN: '{{ pki_fact_session_token }}'
   command: ./lib/pki-authority sign-by-host
-           {% for host in play_hosts %}{{ hostvars[host].pki_fact_fqdn | d('') }} {% endfor %}
+           {% for host in play_hosts %}{{ host }} {% endfor %}
   args:
     chdir: '{{ secret + "/pki" }}'
   delegate_to: 'localhost'
@@ -396,7 +393,7 @@
   block:
     - name: Download public realm contents by host
       copy:
-        src: '{{ secret + "/pki/realms/by-host/" + pki_fqdn + "/" + item.0.name + "/" + item.1 + "/" }}'
+        src: '{{ secret + "/pki/realms/by-host/" + inventory_hostname + "/" + item.0.name + "/" + item.1 + "/" }}'
         dest: '/etc/pki/realms/{{ item.0.name }}/{{ item.1 }}/'
         owner: 'root'
         group: 'root'
@@ -455,7 +452,7 @@
 
     - name: Download custom CA certificates by host
       copy:
-        src: '{{ secret + "/pki/ca-certificates/by-host/" + pki_fqdn + "/" }}'
+        src: '{{ secret + "/pki/ca-certificates/by-host/" + inventory_hostname + "/" }}'
         dest: '/usr/local/share/ca-certificates/pki/'
         owner: 'root'
         group: 'root'

@@ -20,7 +20,166 @@ You can read information about required changes between releases in the
 `debops master`_ - unreleased
 -----------------------------
 
-.. _debops master: https://github.com/debops/debops/compare/v2.0.0...master
+.. _debops master: https://github.com/debops/debops/compare/v2.1.0...master
+
+Added
+~~~~~
+
+New DebOps roles
+''''''''''''''''
+
+- The :ref:`debops.global_handlers` Ansible role provides a central place to
+  maintain handlers for other Ansible roles. Keeping them centralized allows
+  Ansible roles to use handlers from different roles without including them
+  entirely in the playbook.
+
+- The :ref:`debops.filebeat` role can be used to install and configure
+  `Filebeat`__, a log shipping agent from Elastic, part of the Elastic Stack.
+
+  .. __: https://www.elastic.co/beats/filebeat
+
+:ref:`debops.postgresql` role
+'''''''''''''''''''''''''''''
+
+- The role can now drop PostgreSQL databases and remove roles when their state
+  is set to ``absent`` in the Ansible inventory.
+
+:ref:`debops.resources` role
+''''''''''''''''''''''''''''
+
+- Support manipulating file privileges using the Linux
+  :manpage:`capabilities(7)` with the help of the Ansible capabilities
+  module.
+
+:ref:`debops.slapd` role
+''''''''''''''''''''''''
+
+- Support for the dynamic LDAP groups maintained by the
+  :ref:`slapd__ref_autogroup_overlay` has been implemented in the role. Debian
+  Buster or newer is recommended for this feature to work properly.
+
+Changed
+~~~~~~~
+
+General
+'''''''
+
+- The ``debops.debops`` role has been renamed to the :ref:`debops.controller`
+  role to allow for the ``debops__`` variable namespace to be used for global
+  variables. All role variables have been renamed along with the role inventory
+  group, you will have to update your inventory.
+
+- Most of the handers from different DebOps roles have been moved to the new
+  :ref:`debops.global_handlers` role to allow for easier cross-role handler
+  notification. The role has been imported in roles that rely on the handlers.
+
+:ref:`debops.postfix` role
+''''''''''''''''''''''''''
+
+- Postfix :file:`main.cf` configuration overrides are now written to the
+  :file:`master.cf` configuration file using 'long form' notation supported
+  since Postfix 3.0. This allows specifying parameter values that contain
+  whitespace.
+
+:ref:`debops.slapd` role
+''''''''''''''''''''''''
+
+- The role will set up an additional instance of the ``memberof`` OpenLDAP
+  overlay to update role membership in the ``organizationalRole`` LDAP objects.
+  This change modifies the list of overlays and will require re-initialization
+  of the OpenLDAP directory.
+
+- New equality indexes have been added to the :command:`slapd` service:
+  ``roleOccupant``, ``memberOf`` and ``employeeNumber``.
+
+- The :file:`eduperson.schema` LDAP schema has been extended with additional
+  attributes not present in the official specification. The new schema will not
+  be applied automatically on existing installations.
+
+Fixed
+~~~~~
+
+General
+'''''''
+
+- Fixed an issue where the :command:`debops` scripts did not expand the
+  :file:`~/` prefix of the file and directory paths in user home directories.
+
+LDAP
+''''
+
+- The :file:`ldap/init-directory.yml` playbook will correctly initialize the
+  LDAP directory when the local UNIX account does not have any GECOS
+  information.
+
+:ref:`debops.apt` role
+''''''''''''''''''''''
+
+- Fixed an issue where the role would attempt to add APT keys from a PGP
+  keyserver without installing the :command:`gnupg` package first.
+
+:ref:`debops.dokuwiki` role
+'''''''''''''''''''''''''''
+
+- A few custom DokuWiki plugins will be removed if installed, otherwise they
+  will not be installed anymore due to issues with newest DokuWiki release.
+  Affected plugins: ``advrack``, ``rst``, ``gitlab``, ``ghissues``.
+
+- Ensure that the ``authldap`` DokuWiki plugin is enabled when LDAP support is
+  configured by the role.
+
+:ref:`debops.ldap` role
+'''''''''''''''''''''''
+
+- Fixed multiple issues with adding and updating hosts to the LDAP directory
+  when these hosts were configured for network bonding.
+
+:ref:`debops.owncloud` role
+''''''''''''''''''''''''''''
+
+- Fixed multiple issues which caused dry runs of the :ref:`debops.owncloud` role
+  to incorrectly show pending changes or fail altogether.
+
+:ref:`debops.php` role
+''''''''''''''''''''''
+
+- Set correct APT preferences for the Backports or Sury APT repository to
+  the ``libapache2-mod-php*`` APT packages to ensure that the selected
+  repository is the same as the ``php*`` APT packages.
+
+:ref:`debops.rsnapshot` role
+''''''''''''''''''''''''''''
+
+- Fixed an issue which caused dry runs of the :ref:`debops.rsnapshot` role to
+  fail.
+
+:ref:`debops.slapd` role
+''''''''''''''''''''''''
+
+- Modify the :file:`mailservice.schema` LDAP schema so that various
+  mail-related attributes do not use the ``mail`` attribute as SUPerior
+  attribute. This fixes an issue where searching for ``mail`` attribute values
+  returned entries with the values present in related attributes, for example
+  ``mailForwardTo``, causing problems with account lookups.
+
+  This change will require the rebuild of the OpenLDAP directory to be applied
+  correctly. The role will not apply the changes on existing installations
+  automatically due to the :file:`mailservice.schema` being loaded into the
+  database.
+
+:ref:`debops.tinc` role
+'''''''''''''''''''''''
+
+- Fix issue with Tinc VPN interfaces starting before the general host
+  networking is set up and failing to bind to the selected bridge interface.
+  The Tinc :command:`systemd` service will wait for the
+  ``network-online.target`` unit to start up before activation.
+
+
+`debops v2.1.0`_ - 2020-06-21
+-----------------------------
+
+.. _debops v2.1.0: https://github.com/debops/debops/compare/v2.0.0...v2.1.0
 
 Added
 ~~~~~
@@ -54,6 +213,15 @@ New DebOps roles
   used to install the InfluxDB time series database service and manage its
   databases and users, respectively.
 
+- The :ref:`debops.fhs` role will be used to define base directory hierarchy
+  used by other DebOps roles (previously done by the :ref:`debops.core` role).
+  The role is included in the :file:`common.yml` playbook.
+
+- The :ref:`debops.tzdata` role manages the host time zone configuration and
+  provides the ``ansible_local.tzdata.timezone`` local fact with the time zone
+  in the ``Area/Zone`` format. The role is included in the :file:`common.yml`
+  playbook.
+
 :ref:`debops.pki` role
 ''''''''''''''''''''''
 
@@ -71,6 +239,14 @@ New DebOps roles
 - The additional Postfix configuration managed by the role can now be added or
   removed conditionally, controlled by the :envvar:`postconf__deploy_state`
   variable.
+
+:ref:`debops.python` role
+'''''''''''''''''''''''''
+
+- Introduce :envvar:`python__pip_version_check` which defaults to ``False`` to
+  disable PIP update checks outside of the system package manager.
+  Before, this was not configured by DebOps leaving it at PIP default which
+  meant it would check for updates occasionally.
 
 :ref:`debops.resources` role
 ''''''''''''''''''''''''''''
@@ -166,6 +342,23 @@ General
   in the :file:`.debops.cfg` configuration file ``[ansible defaults]`` section
   instead of the static :file:`ansible/inventory/` path.
 
+- The variables in various DebOps roles that define filesystem paths have been
+  switched from using the ``ansible_local.root.*`` Ansible local facts to the
+  new ``ansible_local.fhs.*`` facts defined by the :ref:`debops.fhs` role.
+  The new facts use the same base paths as the old ones; there should be no
+  issues if the variables have not been modified through Ansible inventory.
+
+  If you have redefined any ``core__root_*`` variables in the Ansible inventory
+  to modify the filesystem paths used by DebOps roles, you will need to update
+  the configuration. See the :ref:`debops.fhs` role documentation for details.
+
+- The use of ``ansible_local.core.fqdn`` and ``ansible_local.core.domain``
+  local facts in roles to define the host DNS domain and FQDN has been removed;
+  the roles will use the ``ansible_fqdn`` and ``ansible_domain`` facts
+  directly. This is due to issues with the :ref:`debops.core` local facts not
+  updating when the host's domain is changed and causing the roles to use wrong
+  domain names in configuration.
+
 :ref:`debops.cran` role
 '''''''''''''''''''''''
 
@@ -196,6 +389,12 @@ General
   dependency on the ``lxc`` APT package. In this case, the ``lxcbr0`` network
   bridge will not be configured by default.
 
+:ref:`debops.mosquitto` role
+''''''''''''''''''''''''''''
+
+- Update the role for Debian Buster. No need anymore to install Python packages
+  outside of the system package management.
+
 :ref:`debops.nginx` role
 ''''''''''''''''''''''''
 
@@ -212,6 +411,18 @@ General
 '''''''''''''''''''''''''''
 
 - Support has been added for Nextcloud 17.0 and 18.0.
+
+:ref:`debops.pki` role
+''''''''''''''''''''''
+
+- Use ``inventory_hostname`` variable instead of the ``ansible_fqdn`` variable
+  in paths of the directories used to store data on Ansible Controller. This
+  decouples the host FQDN and domain name from the certificate management tasks
+  in the role.
+
+  .. note:: The role will try to recreate existing X.509 certificates making
+            the playbook execution idempotent. Removing the PKI realms and
+            recreating them will fix this issue.
 
 :ref:`debops.postfix` role
 ''''''''''''''''''''''''''
@@ -236,12 +447,13 @@ General
 Removed
 ~~~~~~~
 
-:ref:`debops.nullmailer` role
-'''''''''''''''''''''''''''''
+:ref:`debops.console` role
+''''''''''''''''''''''''''
 
-- The script and :command:`dpkg` hook that cleaned up the additional files
-  maintained by the role has been removed; the :ref:`debops.dpkg_cleanup` role
-  will be used for this purpose instead.
+- The local and NFS mount support has been removed from the
+  :ref:`debops.console` role. Local mounts can be managed using the
+  :ref:`debops.mount` role; NFS mounts can be managed by the :ref:`debops.nfs`
+  role.
 
 :ref:`debops.core` role
 '''''''''''''''''''''''
@@ -249,6 +461,35 @@ Removed
 - The ``ansible_local.uuid`` local fact and corresponding variables and tasks
   have been removed from the role. A replacement fact, ``ansible_machine_id``
   is an Ansible built-in.
+
+- The ``ansible_local.init`` fact has been removed from the role. A native
+  ``ansible_service_mgr`` Ansible fact is it's replacement.
+
+- The ``ansible_local.cap12s`` fact has been removed from the role. A native
+  set of Ansible facts (``ansible_system_capabilities``,
+  ``ansible_system_capabilities_enforced`` is be used as a replacement.
+
+- The :file:`root.fact` script, corresponding variables and documentation have
+  been removed from the role. This functionality is now managed by the
+  :ref:`debops.fhs` role.
+
+- The ``ansible_local.core.fqdn`` and ``ansible_local.core.domain`` local facts
+  and their corresponding default variables have been removed from the role. In
+  their place, ``ansible_fqdn`` and ``ansible_domain`` facts should be used
+  instead.
+
+:ref:`debops.ntp` role
+''''''''''''''''''''''
+
+- The timezone configuration has been moved from the :ref:`debops.ntp` role to
+  the :ref:`debops.tzdata` role.
+
+:ref:`debops.nullmailer` role
+'''''''''''''''''''''''''''''
+
+- The script and :command:`dpkg` hook that cleaned up the additional files
+  maintained by the role has been removed; the :ref:`debops.dpkg_cleanup` role
+  will be used for this purpose instead.
 
 Fixed
 ~~~~~
@@ -268,11 +509,23 @@ General
   contained multiple uses of a particular custom Ansible plugin, for example
   ``template_src`` or ``file_src``, were modified multiple times by the script.
 
+:ref:`debops.apt` role
+''''''''''''''''''''''
+
+- Fix BeagleBoards detection with Debian 10 image.
+  Tested with a BeagleBoards Black.
+
 :ref:`debops.cron` role
 '''''''''''''''''''''''
 
 - Fix creation of empty environment variables in :command:`cron` configuration
   files managed by Ansible.
+
+:ref:`debops.dnsmasq` role
+''''''''''''''''''''''''''
+
+- :envvar:`dnsmasq__public_dns` did not create a firewall allow rule when no
+  interfaces where specified.
 
 :ref:`debops.ferm` role
 '''''''''''''''''''''''
@@ -529,7 +782,7 @@ Mail Transport Agents
 - The :envvar:`nullmailer__mailname` and the :envvar:`postfix__mailname`
   variables will use the host's FQDN address instead of the DNS domain as the
   mailname. This was done to not include the hostnames in the e-mail addresses,
-  however this is better handled by Postfix domain nasquerading done on the
+  however this is better handled by Postfix domain masquerading done on the
   mail relay host, which allows for exceptions, supports multiple DNS domains
   and does not break mail delivery in subtle ways. See the
   :ref:`debops.nullmailer` role documentation for an example configuration.
@@ -609,7 +862,7 @@ Mail Transport Agents
 :ref:`debops.postconf` role
 '''''''''''''''''''''''''''
 
-- If both :ref:`Devecot <debops.dovecot>` and :ref:`Cyrus <debops.saslauthd>`
+- If both :ref:`Dovecot <debops.dovecot>` and :ref:`Cyrus <debops.saslauthd>`
   services are installed on a host, Postfix will be configured to prefer Cyrus
   for SASL authentication. This permits mail relay via the authenticated
   :ref:`nullmailer <debops.nullmailer>` Mail Transfer Agents with accounts in
@@ -2983,7 +3236,7 @@ New DebOps roles
 ''''''''''''''''
 
 - The :ref:`debops.ansible` role: install Ansible on a Debian/Ubuntu host using
-  Ansible. The :ref:`debops.debops` role now uses the new role to install
+  Ansible. The ```debops.debops`` role now uses the new role to install
   Ansible instead of doing it directly.
 
 - The :ref:`debops.apt_mark` role: set install state of APT packages

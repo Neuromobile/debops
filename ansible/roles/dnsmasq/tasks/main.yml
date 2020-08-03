@@ -7,6 +7,9 @@
 - import_role:
     name: 'ansible_plugins'
 
+- import_role:
+    name: 'global_handlers'
+
 - name: Install required packages
   package:
     name: '{{ q("flattened", (dnsmasq__base_packages + dnsmasq__packages)) }}'
@@ -29,8 +32,7 @@
     owner: 'root'
     group: 'root'
     mode: '0755'
-    unsafe_writes: '{{ True if (core__unsafe_writes|d(True if (ansible_local|d() and ansible_local.core|d()
-                       and ansible_local.core.unsafe_writes|d() | bool) else False) | bool) else omit }}'
+    unsafe_writes: '{{ True if (core__unsafe_writes|d(ansible_local.core.unsafe_writes|d()) | bool) else omit }}'
   register: dnsmasq__register_facts
 
 - name: Reload facts if they were modified
@@ -99,8 +101,7 @@
     owner: 'root'
     group: 'root'
     mode: '0644'
-    unsafe_writes: '{{ True if (core__unsafe_writes|d(True if (ansible_local|d() and ansible_local.core|d()
-                       and ansible_local.core.unsafe_writes|d() | bool) else False) | bool) else omit }}'
+    unsafe_writes: '{{ True if (core__unsafe_writes|d(ansible_local.core.unsafe_writes|d()) | bool) else omit }}'
   notify: [ 'Test and restart dnsmasq' ]
 
 - name: Configure custom nameservers in resolvconf
@@ -110,7 +111,6 @@
     owner: 'root'
     group: 'root'
     mode: '0644'
-    unsafe_writes: '{{ True if (core__unsafe_writes|d(True if (ansible_local|d() and ansible_local.core|d()
-                       and ansible_local.core.unsafe_writes|d() | bool) else False) | bool) else omit }}'
+    unsafe_writes: '{{ True if (core__unsafe_writes|d(ansible_local.core.unsafe_writes|d()) | bool) else omit }}'
   notify: [ 'Test and restart dnsmasq' ]
   when: dnsmasq__nameservers|d()

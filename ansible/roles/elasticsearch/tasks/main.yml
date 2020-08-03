@@ -6,6 +6,9 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 - import_role:
+    name: 'global_handlers'
+
+- import_role:
     name: 'secret'
 
 - name: Check if the dependent config file exists
@@ -14,8 +17,7 @@
   register: elasticsearch__register_dependent_config_file
   become: False
   delegate_to: 'localhost'
-  when: (ansible_local|d() and ansible_local.elasticsearch|d() and
-         ansible_local.elasticsearch.installed|d())
+  when: (ansible_local.elasticsearch.installed|d())
   tags: [ 'role::elasticsearch:config' ]
 
 - name: Load the dependent configuration from Ansible Controller
@@ -24,8 +26,7 @@
   register: elasticsearch__register_dependent_config
   become: False
   delegate_to: 'localhost'
-  when: (ansible_local|d() and ansible_local.elasticsearch|d() and
-         ansible_local.elasticsearch.installed|d() and
+  when: (ansible_local.elasticsearch.installed|d() and
          elasticsearch__register_dependent_config_file.stat.exists|bool)
   tags: [ 'role::elasticsearch:config' ]
 

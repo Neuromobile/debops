@@ -4,6 +4,9 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 - import_role:
+    name: 'global_handlers'
+
+- import_role:
     name: 'secret'
 
 - name: Check if supported version of libwebsockets is available
@@ -59,9 +62,7 @@
 - name: Make sure the password file exists
   file:
     path: '{{ mosquitto__password_file }}'
-    state: '{{ "file"
-               if (ansible_local|d() and ansible_local.mosquitto|d() and
-                   ansible_local.mosquitto.password|bool) else "touch" }}'
+    state: '{{ "file" if (ansible_local.mosquitto.password|d()|bool) else "touch" }}'
     owner: 'root'
     group: '{{ mosquitto__group }}'
     mode:  '0640'
