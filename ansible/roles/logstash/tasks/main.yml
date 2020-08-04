@@ -4,6 +4,9 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 - import_role:
+    name: 'ansible_plugins'
+
+- import_role:
     name: 'secret'
 
 - name: Check if the dependent config file exists
@@ -36,16 +39,31 @@
   when: logstash__pki|bool
 
 - name: Divert original configuration files
-  command: dpkg-divert --quiet --local --divert {{ item }}.dpkg-divert
-           --rename {{ item }}
-  args:
-    creates: '{{ item }}.dpkg-divert'
+  dpkg_divert:
+    path: '{{ item }}'
+    state: 'present'
+    delete: True
   with_items:
     - '/etc/logstash/logstash.yml'
     - '/etc/logstash/pipelines.yml'
     - '/etc/logstash/jvm.options'
   notify: [ 'Start logstash' ]
   tags: [ 'role::logstash:config' ]
+
+  # https://github.com/elastic/logstash/issues/9897
+- name: Generate private key in PKCS8 format
+  command: '{{ "openssl pkcs8 -topk8 -inform pem -in " + logstash__pki_path + "/" + logstash__pki_realm +
+               "/" + logstash__pki_key + " -outform pem -nocrypt -out " + logstash__pki_path + "/" +
+               logstash__pki_realm + "/" + logstash__pki_key_pkcs8 }}'
+  when: logstash__pki
+
+- name: Set correct permissions for key in PKCS8 format
+  file:
+    path: '{{ logstash__pki_path + "/" + logstash__pki_realm + "/" + logstash__pki_key_pkcs8 }}'
+    owner: 'root'
+    group: 'ssl-cert'
+    mode: '0640'
+  when: logstash__pki
 
 - name: Generate Logstash configuration
   template:
