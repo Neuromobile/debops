@@ -51,6 +51,16 @@ New DebOps roles
   :manpage:`capabilities(7)` with the help of the Ansible capabilities
   module.
 
+:ref:`debops.roundcube` role
+''''''''''''''''''''''''''''
+
+- The role will enable more plugins by default: ``help``, ``markasjunk``,
+  ``password`` (only with LDAP).
+
+- Roundcube will offer local spell checking support by default with ``Enchant``
+  library. English language is supported by default, more languages can be
+  added via Ansible inventory.
+
 :ref:`debops.slapd` role
 ''''''''''''''''''''''''
 
@@ -60,6 +70,16 @@ New DebOps roles
 
 Changed
 ~~~~~~~
+
+Updates of upstream application versions
+''''''''''''''''''''''''''''''''''''''''
+
+- In the :ref:`debops.ipxe` role, the Debian Stretch and Debian Buster netboot
+  installer versions have been updated to their next point releases, 9.13 and
+  10.5 respectively.
+
+- In the :ref:`debops.roundcube` role, the Roundcube version installed by
+  default has been updated to ``v1.4.7``.
 
 General
 '''''''
@@ -95,6 +115,18 @@ General
 - The :file:`eduperson.schema` LDAP schema has been extended with additional
   attributes not present in the official specification. The new schema will not
   be applied automatically on existing installations.
+
+- In the OpenLDAP ACL rules, authenticated object owners can now
+  re-authenticate themselves using the ``userPassword`` attribute. This is
+  needed for the LDAP Password Modify Extended Operation (:rfc:`3062`) to work
+  correctly in Roundcube.
+
+- In the :file:`mailservice.schema` LDAP schema, the ``mailACLGroups``
+  attribute has been renamed to ``mailGroupACL`` since this seems to be the
+  name used by different applications like Dovecot and Roundcube.
+
+  This change will not be applied automatically in an existing LDAP directories
+  - they will need to be rebuilt to apply new schema changes.
 
 Fixed
 ~~~~~
