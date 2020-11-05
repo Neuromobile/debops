@@ -1,4 +1,5 @@
 .. Copyright (C) 2017-2020 Maciej Delmanowski <drybjed@gmail.com>
+.. Copyright (C) 2018-2020 Robin Schneider <ypid@riseup.net>
 .. Copyright (C) 2017-2020 DebOps <https://debops.org/>
 .. SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -28,6 +29,10 @@ Added
 New DebOps roles
 ''''''''''''''''
 
+- The :ref:`debops.dhcrelay` role can be used to manage the ISC DHCP Relay
+  Agent, which forwards DHCP traffic between networks. This role replaces the
+  dhcrelay functionality in :ref:`debops.dhcpd`.
+
 - The :ref:`debops.global_handlers` Ansible role provides a central place to
   maintain handlers for other Ansible roles. Keeping them centralized allows
   Ansible roles to use handlers from different roles without including them
@@ -37,6 +42,45 @@ New DebOps roles
   `Filebeat`__, a log shipping agent from Elastic, part of the Elastic Stack.
 
   .. __: https://www.elastic.co/beats/filebeat
+
+General
+'''''''
+
+- The :file:`tools/reboot.yml` can be used to reboot DebOps hosts even if they
+  are secured by the ``molly-guard`` package.
+
+LDAP
+''''
+
+- The :ref:`next available UID and GID values <ldap__ref_next_uid_gid>` can now
+  be tracked using special LDAP objects in the directory. These can be used by
+  the client-side account and group management applications to easily allocate
+  unique UID/GID numbers for newly created accounts and groups.
+
+  The objects will be created automatically with the next available UID/GID
+  values by the :file:`ldap/init-directory.yml` playbook. In existing
+  environments users might want to create them manually to ensure that the
+  correct ``uidNumber`` and ``gidNumber`` values are stored instead of the
+  default ones which might already be allocated.
+
+:ref:`debops.icinga` role
+'''''''''''''''''''''''''
+
+- The role can now create Icinga configuration on the Icinga "master" node via
+  task delegation. This can be useful in centralized environments without
+  Icinga Director support.
+
+:ref:`debops.lvm` role
+''''''''''''''''''''''
+
+- Default LVM2 configuration for Debian Stretch and Buster has been added.
+
+:ref:`debops.owncloud` role
+'''''''''''''''''''''''''''
+
+- Drop Nextcloud 16 and 17 support because it is EOL. You need to upgrade Nextcloud
+  manually if you are running version 17 or below. The role now defaults to
+  Nextcloud 18 for new installations.
 
 :ref:`debops.postgresql` role
 '''''''''''''''''''''''''''''
@@ -68,6 +112,26 @@ New DebOps roles
   :ref:`slapd__ref_autogroup_overlay` has been implemented in the role. Debian
   Buster or newer is recommended for this feature to work properly.
 
+- A set of `FreeRADIUS`__ LDAP schema has been added to the role. RADIUS
+  Profiles, Clients and FreeRADIUS DHCP configuration can be stored in the LDAP
+  directory managed by DebOps and used by the :ref:`debops.freeradius` Ansible
+  role.
+
+  .. __: https://freeradius.org/
+
+- Support for empty LDAP groups has been added via the :ref:`groupfentries
+  schema <slapd__ref_groupofentries>` with a corresponding ``memberOf``
+  overlay. This change changes the order of existing overlays in the LDAP
+  database which means that the directory server will have to be rebuilt.
+
+:ref:`debops.sysctl` role
+'''''''''''''''''''''''''
+
+- The role can now be enabled or disabled conditionally via Ansible inventory.
+  This might be required in certain cases, for example LXD containers or
+  systems protected with AppArmor rules, which make the :file:`/proc/sys/`
+  directory read-only.
+
 Changed
 ~~~~~~~
 
@@ -76,10 +140,25 @@ Updates of upstream application versions
 
 - In the :ref:`debops.ipxe` role, the Debian Stretch and Debian Buster netboot
   installer versions have been updated to their next point releases, 9.13 and
-  10.5 respectively.
+  10.6 respectively.
 
 - In the :ref:`debops.roundcube` role, the Roundcube version installed by
-  default has been updated to ``v1.4.7``.
+  default has been updated to ``1.4.9``.
+
+- In the :ref:`debops.owncloud` role, the Nextcloud version installed by
+  default has been updated to ``v18.0``.
+
+- In the :ref:`debops.phpipam` role, the phpIPAM version installed by default
+  has been updated to ``v1.4.1``.
+
+- In the :ref:`debops.netbox` role, the NetBox version has been updated to
+  ``v2.9.4``.
+  The plugin support added in ``v2.8.0`` can be configured from DebOps.
+  The NetBox Request Queue Worker service is configured to support background jobs
+  like reports to work.
+
+- The :ref:`debops.mariadb` and :ref:`debops.mariadb_server` roles now support
+  installation of Percona Server/Client v8.0 from upstream APT repositories.
 
 General
 '''''''
@@ -93,6 +172,60 @@ General
   :ref:`debops.global_handlers` role to allow for easier cross-role handler
   notification. The role has been imported in roles that rely on the handlers.
 
+- The ``debops-contrib.*`` roles included in the DebOps monorepo have been
+  renamed to drop the prefix. This is enforced by the new release of the
+  :command:`ansible-lint` linter. These roles are not yet cleaned up and
+  integrated with the main playbook.
+
+LDAP
+''''
+
+- The :ref:`LDAP-POSIX integration <ldap__ref_posix>` can now be disabled using
+  a default variable. This will disable LDAP support in the POSIX environment
+  and specific services (user accounts, PAM, :command:`sshd`, :command:`sudo`)
+  while leaving higher-level services unaffected.
+
+:ref:`debops.dhcpd` role
+''''''''''''''''''''''''
+
+- The ``debops.dhcpd`` role has been largely rewritten in order to support
+  both IPv4 and IPv6 on the same server, and to modernize many aspects of the
+  role.
+
+- The DHCP Relay Agent functionality has been moved to :ref:`debops.dhcrelay`.
+
+:ref:`debops.fhs` role
+''''''''''''''''''''''
+
+- The role will create the :file:`/srv/www/` directory by default to allow for
+  home directories used by web applications.
+
+:ref:`debops.lvm` role
+''''''''''''''''''''''
+
+- Linux Software RAID devices are now scanned by default.
+
+:ref:`debops.nginx` role
+''''''''''''''''''''''''
+
+- The default SSL configuration used by the role has been updated to bring it
+  to the modern standards. By default only TLSv1.2 and TLSv1.3 protocols are
+  enabled, along with an improved set of ciphers. The HTTP Strict Transport
+  Security age has been increased from 6 months to 2 years. The configuration
+  is based on the `intermediate Mozilla SSL recommendations`__ to support wide
+  range of possible clients.
+
+  .. __: https://ssl-config.mozilla.org/#server=nginx&version=1.17.7&config=intermediate&openssl=1.1.1d&guideline=5.6
+
+- The server can be configured to support TLSv1.3 protocol only using the
+  :envvar:`nginx_default_tls_protocols` variable, which will disable the use of
+  custom Diffie-Hellman parameters and allow the HTTPS clients to select their
+  own preferred ciphers to use for connections. The preferred set of ciphers
+  will also change to `Mozilla modern`__ variant. Keep in mind that not all
+  clients support this configuration.
+
+  .. __: https://ssl-config.mozilla.org/#server=nginx&version=1.17.7&config=modern&openssl=1.1.1d&guideline=5.6
+
 :ref:`debops.postfix` role
 ''''''''''''''''''''''''''
 
@@ -100,6 +233,14 @@ General
   :file:`master.cf` configuration file using 'long form' notation supported
   since Postfix 3.0. This allows specifying parameter values that contain
   whitespace.
+
+:ref:`debops.resolvconf` role
+'''''''''''''''''''''''''''''
+
+- The 'domain', 'nameservers' and 'search' variables have been removed from the
+  resolvconf Ansible local facts script. You are encouraged to use the
+  `ansible_domain`, `ansible_dns.nameservers` and `ansible_dns.search` variables
+  instead.
 
 :ref:`debops.slapd` role
 ''''''''''''''''''''''''
@@ -128,6 +269,11 @@ General
   This change will not be applied automatically in an existing LDAP directories
   - they will need to be rebuilt to apply new schema changes.
 
+- The role will install a modified :ref:`OpenSSH-LPK schema
+  <slapd__ref_openssh_lpk>` instead of the version from the FusionDirectory
+  project, to add support for storing SSH public key fingerprints in the LDAP
+  directory. Existing installations shouldn't be affected.
+
 Fixed
 ~~~~~
 
@@ -136,6 +282,10 @@ General
 
 - Fixed an issue where the :command:`debops` scripts did not expand the
   :file:`~/` prefix of the file and directory paths in user home directories.
+
+- Fixed an issue with custom lookup plugins (:file:`task_src`,
+  :file:`file_src`, :file:`template_src`) which resulted in Ansible 2.10 not
+  finding them correctly.
 
 LDAP
 ''''
@@ -160,11 +310,50 @@ LDAP
 - Ensure that the ``authldap`` DokuWiki plugin is enabled when LDAP support is
   configured by the role.
 
+:ref:`debops.etherpad` role
+'''''''''''''''''''''''''''
+
+- Fixed the installation of Etherpad with the PostgreSQL backend by removing
+  unused dependent variables.
+
+:ref:`debops.fail2ban` role
+'''''''''''''''''''''''''''
+
+- Fixed the configuration support on Ubuntu Focal due to bantime feature
+  changes in the :command:`fail2ban` v0.11.
+
+:ref:`debops.ifupdown` role
+'''''''''''''''''''''''''''
+
+- Network configuration with bonded interfaces should now be correctly applied
+  by the reconfiguration script.
+
 :ref:`debops.ldap` role
 '''''''''''''''''''''''
 
 - Fixed multiple issues with adding and updating hosts to the LDAP directory
   when these hosts were configured for network bonding.
+
+:ref:`debops.nslcd` role
+''''''''''''''''''''''''
+
+- Enabled idle_timelimit to make sure that connections to the LDAP server are
+  properly closed. A disabled or too high idle_timelimit causes the LDAP server
+  to time out, resulting in nslcd errors like "ldap_result() failed: Can't
+  contact LDAP server".
+
+:ref:`debops.nfs` role
+''''''''''''''''''''''
+
+- Ensure that with default mount options disabled, options specified by the
+  user still are added in the configuration.
+
+:ref:`debops.ntp` role
+''''''''''''''''''''''
+
+- Don't try to disable or stop the ``systemd-timesyncd`` service when using an
+  alternative NTP service implementation and ``systemd-timesyncd`` is not
+  available.
 
 :ref:`debops.owncloud` role
 ''''''''''''''''''''''''''''
@@ -179,11 +368,33 @@ LDAP
   the ``libapache2-mod-php*`` APT packages to ensure that the selected
   repository is the same as the ``php*`` APT packages.
 
+:ref:`debops.pki` role
+''''''''''''''''''''''
+
+- The :command:`acme-tiny` script will be installed from Debian/Ubuntu
+  repositories on Debian Buster, Ubuntu Focal and newer OS releases. This
+  solves the issue with ``acme-tiny`` script in upstream having
+  ``#!/usr/bin/env python`` shebang hard-coded which makes the script unusable
+  on hosts without Python 2.7 installed.
+
+  The installation location of the script from upstream is changed from
+  :file:`/usr/local/lib/pki/` to :file:`/usr/local/bin/` to leverage the
+  ``$PATH`` variable so that the OS version is used without issues. The script
+  is now also symlinked into place instead of copied over.
+
 :ref:`debops.rsnapshot` role
 ''''''''''''''''''''''''''''
 
 - Fixed an issue which caused dry runs of the :ref:`debops.rsnapshot` role to
   fail.
+
+:ref:`debops.rsyslog` role
+''''''''''''''''''''''''''
+
+- Fixed the forgotten :envvar:`rsyslog__send_permitted_peers` variable which
+  defines what server is accepted by the client during TLS handshakes. The
+  value will now be defined using the ``streamDriverPermittedPeers`` parameter
+  in :command:`rsyslog` configuration.
 
 :ref:`debops.slapd` role
 ''''''''''''''''''''''''
@@ -198,6 +409,15 @@ LDAP
   correctly. The role will not apply the changes on existing installations
   automatically due to the :file:`mailservice.schema` being loaded into the
   database.
+
+:ref:`debops.system_users` role
+'''''''''''''''''''''''''''''''
+
+- Fixed an issue where the role execution broke if the
+  :envvar:`system_users__self_name` variable was set to an UNIX account which
+  does not exist on the Ansible Controller, for example ``ansible``. The role
+  will now correctly create such UNIX accounts on the remote hosts with default
+  GECOS and shell values.
 
 :ref:`debops.tinc` role
 '''''''''''''''''''''''

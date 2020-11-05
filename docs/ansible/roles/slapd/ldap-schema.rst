@@ -203,6 +203,19 @@ attribute as the UNIX group name, but it's usually a simple configuration
 change.
 
 
+.. _slapd__ref_nextuidgid_schema:
+
+The ``nextuidgid`` schema
+-------------------------
+
+The ``nexuidgid`` schema defines a set of simple LDAP objects (``uidNext``,
+``gidNext``), which can be used to store ``uidNumber`` and ``gidNumber``
+values, respectively. These objects are used in DebOps to :ref:`keep track of
+the next available UID/GID values <ldap__ref_next_uid_gid>`, but can be used
+for other purposes, for example to split the UID/GID range used in the LDAP
+directory into subranges.
+
+
 .. _slapd__ref_ppolicy_schema:
 
 The ``ppolicy`` schema
@@ -226,6 +239,19 @@ user or application. LDAP clients can use these attributes in LDAP filters to
 grant access only to specific people or applications.
 
 
+.. _slapd__ref_groupofentries:
+
+The ``groupofentries`` schema
+-----------------------------
+
+The ``groupofentries`` schema defines a new `"groupOfEntries" LDAP Object
+Class`__ which is meant to replace the ``groupOfNames`` object defined by
+:rfc:`2256`. The new object can be used to create groups that can be empty (no
+``member`` attribute required).
+
+.. __: https://tools.ietf.org/html/draft-findlay-ldap-groupofentries-00
+
+
 .. _slapd__ref_openssh_lpk:
 
 The ``openssh-lpk`` schema
@@ -237,6 +263,11 @@ SSH authentication via LDAP directory. An `example openssh-ldap-publickey`__
 script shows how this can be configured with OpenSSH and OpenLDAP.
 
 .. __: https://github.com/AndriiGrytsenko/openssh-ldap-publickey
+
+The :ref:`debops.slapd` Ansible role contains a modified version of the
+official schema which adds a separate attribute for the public key
+fingerprints, meant to help find the key owners based on the information logged
+by the :command:`sshd` service.
 
 The :ref:`debops.sshd` Ansible role already contains support for SSH public key
 lookup in OpenLDAP, see its documentation for more details about enabling the
@@ -333,3 +364,23 @@ updating these objects each time an LDAP entry included in the specified search
 is created, modified or destroyed.
 
 .. __: https://www.zytrax.com/books/ldap/ch11/dynamic.html
+
+.. _slapd__ref_freeradius_schema:
+
+The ``freeradius`` schema
+-------------------------
+
+The ``freeradius`` schema provide definitions of various LDAP objects usable by
+the `FreeRADIUS`__ service, namely RADIUS Clients, RADIUS Profiles, RADIUS
+Accounting database objects, and FreeRADIUS DHCPv4/DHCPv6 configuration
+objects. The version of the schema included in DebOps is based on the
+``master`` branch of the FreeRADIUS project code.
+
+Keep in mind that the FreeRADIUS schema is split into multiple
+:file:`freeradius-*.schema` files, and the main file defines just the
+``objectIdentifier`` LDAP objects used in other schema files. If you don't want
+to use specific FreeRADIUS features you should be able to disable them by
+changing the list of LDAP schemas the role loads, but the
+:file:`freeradius.schema` file should be always present.
+
+.. __: https://freeradius.org/

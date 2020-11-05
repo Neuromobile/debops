@@ -36,6 +36,7 @@
     regexp: '^(enabled  = )true'
     line: '\1false'
     backrefs: yes
+    mode: '0644'
   notify: [ 'Reload fail2ban jails' ]
 
 - name: Install custom fail2ban rule files
@@ -44,7 +45,17 @@
     dest: '/etc/fail2ban/'
     owner: 'root'
     group: 'root'
+    mode: 'u=rwX,g=rX,o=rX'
   notify: [ 'Reload fail2ban jails' ]
+
+- name: Install custom fail2ban iptables action files
+  template:
+    src: 'etc/fail2ban/action.d/{{ item }}.local.j2'
+    dest: '/etc/fail2ban/action.d/{{ item }}.local'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+  with_items: [iptables-xt_recent-echo-reject, iptables-xt_recent-echo]
 
 - name: Configure custom fail2ban actions
   template:

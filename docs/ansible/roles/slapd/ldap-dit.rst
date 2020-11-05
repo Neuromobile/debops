@@ -58,9 +58,13 @@ Directory structure
 
         - :ref:`posixgroupid.schema <slapd__ref_posixgroupid>`
 
+        - :ref:`nextuidgid.schema <slapd__ref_nextuidgid_schema>`
+
         - :ref:`ppolicy.schema <slapd__ref_ppolicy_schema>`
 
         - :ref:`ldapns.schema <slapd__ref_ldapns>`
+
+        - :ref:`groupofentries.schema <slapd__ref_groupofentries>`
 
         - :ref:`openssh-lpk.schema <slapd__ref_openssh_lpk>`
 
@@ -73,6 +77,9 @@ Directory structure
         - :ref:`mailservice.schema <slapd__ref_mailservice>`
 
         - :ref:`dyngroup.schema <slapd__ref_dyngroup>`
+
+        - :ref:`freeradius.schema <slapd__ref_freeradius_schema>`
+          (with RADIUS Client/Profile/Accounting, DHCPv4, DHCPv6 schema)
 
       - ``olcDatabase={0}config``
 
@@ -88,19 +95,21 @@ Directory structure
 
         - :ref:`olcOverlay={3}memberof <slapd__ref_memberof_overlay>` (for ``groupOfNames`` LDAP objects)
 
-        - :ref:`olcOverlay={4}memberof <slapd__ref_memberof_overlay>` (for ``groupOfURLs`` LDAP objects)
+        - :ref:`olcOverlay={4}memberof <slapd__ref_memberof_overlay>` (for ``groupOfEntries`` LDAP objects)
 
-        - :ref:`olcOverlay={5}memberof <slapd__ref_memberof_overlay>` (for ``organizationalRole`` LDAP objects)
+        - :ref:`olcOverlay={5}memberof <slapd__ref_memberof_overlay>` (for ``groupOfURLs`` LDAP objects)
 
-        - :ref:`olcOverlay={6}refint <slapd__ref_refint_overlay>`
+        - :ref:`olcOverlay={6}memberof <slapd__ref_memberof_overlay>` (for ``organizationalRole`` LDAP objects)
 
-        - :ref:`olcOverlay={7}auditlog <slapd__ref_auditlog_overlay>`
+        - :ref:`olcOverlay={7}refint <slapd__ref_refint_overlay>`
 
-        - :ref:`olcOverlay={8}constraint <slapd__ref_constraint_overlay>`
+        - :ref:`olcOverlay={8}auditlog <slapd__ref_auditlog_overlay>`
 
-        - :ref:`olcOverlay={9}autogroup <slapd__ref_autogroup_overlay>`
+        - :ref:`olcOverlay={9}constraint <slapd__ref_constraint_overlay>`
 
-        - :ref:`olcOverlay={10}lastbind <slapd__ref_lastbind_overlay>`
+        - :ref:`olcOverlay={10}autogroup <slapd__ref_autogroup_overlay>`
+
+        - :ref:`olcOverlay={11}lastbind <slapd__ref_lastbind_overlay>`
 
         - :envvar:`olcAccess <slapd__acl_tasks>` (:ref:`documentation <slapd__ref_acl>`)
 

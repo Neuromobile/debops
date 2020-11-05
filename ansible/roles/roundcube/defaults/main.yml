@@ -163,7 +163,7 @@ roundcube__git_dir: '{{ roundcube__src + "/"
 # .. envvar:: roundcube__git_version [[[
 #
 # Roundcube release tag to deploy.
-roundcube__git_version: '1.4.7'
+roundcube__git_version: '1.4.9'
 
                                                                    # ]]]
 # .. envvar:: roundcube__git_dest [[[
@@ -4593,7 +4593,8 @@ roundcube__ldap__dependent_tasks:
     objectClass: '{{ roundcube__ldap_self_object_classes }}'
     attributes: '{{ roundcube__ldap_self_attributes }}'
     no_log: True
-    state: '{{ "present" if roundcube__ldap_device_dn|d() else "ignore" }}'
+    state: '{{ "present" if roundcube__ldap_password_enabled and
+                            roundcube__ldap_device_dn|d() else "ignore" }}'
 
                                                                    # ]]]
 # .. envvar:: roundcube__nginx__dependent_servers [[[
