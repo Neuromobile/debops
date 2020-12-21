@@ -63,6 +63,15 @@ LDAP
   correct ``uidNumber`` and ``gidNumber`` values are stored instead of the
   default ones which might already be allocated.
 
+:ref:`debops.apt_install` role
+''''''''''''''''''''''''''''''
+
+- The role now installs CPU microcode packages on physical hosts by default.
+  These firmware updates correct CPU behaviour and mitigate vulnerabilities like
+  Spectre and Meltdown. You still need to take measures to protect your virtual
+  machines; for this, take a look at the QEMU documentation:
+  https://www.qemu.org/docs/master/system/target-i386.html#important-cpu-features-for-intel-x86-hosts
+
 :ref:`debops.icinga` role
 '''''''''''''''''''''''''
 
@@ -152,7 +161,7 @@ Updates of upstream application versions
   has been updated to ``v1.4.1``.
 
 - In the :ref:`debops.netbox` role, the NetBox version has been updated to
-  ``v2.9.4``.
+  ``v2.9.9``.
   The plugin support added in ``v2.8.0`` can be configured from DebOps.
   The NetBox Request Queue Worker service is configured to support background jobs
   like reports to work.
@@ -177,6 +186,15 @@ General
   :command:`ansible-lint` linter. These roles are not yet cleaned up and
   integrated with the main playbook.
 
+- The dependency on ``pyOpenSSL`` has been removed. This dependency was required
+  in Ansible < 2.8.0 because these versions were unable to use the
+  ``cryptography`` module, but DebOps is nowadays developed against Ansible 2.9.
+  pyOpenSSL was used only to generate private RSA keys for the
+  :ref:`debops.opendkim` role. Switching to ``cryptography`` is also a security
+  precaution and the Python Cryptographic Authority
+  [recommends](https://github.com/pyca/cryptography/blob/master/docs/faq.rst#why-use-cryptography)
+  doing so.
+
 LDAP
 ''''
 
@@ -194,11 +212,32 @@ LDAP
 
 - The DHCP Relay Agent functionality has been moved to :ref:`debops.dhcrelay`.
 
+:ref:`debops.docker_server` role
+''''''''''''''''''''''''''''''''
+
+- The role's virtual environment is no longer created by default when
+  :envvar:`docker_server__upstream` is ``False``. This does not impact existing
+  virtualenvs. You can remove ``/usr/local/lib/docker/virtualenv`` yourself if
+  you like.
+
+:ref:`debops.etckeeper` role
+''''''''''''''''''''''''''''
+
+- The role now installs etckeeper on all hosts by default, not just on hosts
+  that have a Python 2 environment. etckeeper is also installed from
+  buster-backports instead of the main Debian 10 repository.
+
 :ref:`debops.fhs` role
 ''''''''''''''''''''''
 
 - The role will create the :file:`/srv/www/` directory by default to allow for
   home directories used by web applications.
+
+:ref:`debops.grub` role
+'''''''''''''''''''''''
+
+- The role will now activate both the serial console and the (previously
+  disabled) native platform console when ``grub__serial_console`` is ``True``.
 
 :ref:`debops.lvm` role
 ''''''''''''''''''''''
@@ -322,17 +361,46 @@ LDAP
 - Fixed the configuration support on Ubuntu Focal due to bantime feature
   changes in the :command:`fail2ban` v0.11.
 
+:ref:`debops.fcgiwrap` role
+'''''''''''''''''''''''''''
+
+- The role can now be used in check mode without throwing an AnsibleFilterError.
+
 :ref:`debops.ifupdown` role
 '''''''''''''''''''''''''''
 
 - Network configuration with bonded interfaces should now be correctly applied
   by the reconfiguration script.
 
+:ref:`debops.iscsi` role
+''''''''''''''''''''''''
+
+- Fixed uninitialized local fact ``ansible_local.iscsi.discovered_portals``.
+
 :ref:`debops.ldap` role
 '''''''''''''''''''''''
 
 - Fixed multiple issues with adding and updating hosts to the LDAP directory
   when these hosts were configured for network bonding.
+
+:ref:`debops.lvm` role
+''''''''''''''''''''''
+
+- Fixed an issue where the role would fail in check mode. The role tries to
+  simulate creating a filesystem, but this failed when the underlying LVM volume
+  did not actually exist (which is to be expected when running in check mode).
+
+- Made default behaviour match the documentation: the role now automatically
+  takes care of mounting a filesystem on an LVM volume if the mount point is
+  specified with ``item.mount``. This previously required setting the
+  ``item.fs`` parameter to ``True`` as well.
+
+:ref:`debops.nginx` role
+''''''''''''''''''''''''
+
+- Disabled gzip compression of text/vcard MIME types. Vcards contain, by nature,
+  sensitive information and should not be gzipped to prevent successful BREACH
+  attacks.
 
 :ref:`debops.nslcd` role
 ''''''''''''''''''''''''
@@ -382,6 +450,14 @@ LDAP
   ``$PATH`` variable so that the OS version is used without issues. The script
   is now also symlinked into place instead of copied over.
 
+:ref:`debops.postgresql_server` role
+''''''''''''''''''''''''''''''''''''
+
+- Rename the ``wal_keep_segments`` PostgreSQL configuration option to
+  ``wal_keep_size`` on PostgreSQL 13 and later to avoid issues with starting
+  the database service. You might need to update the inventory configuration if
+  you use this parameter.
+
 :ref:`debops.rsnapshot` role
 ''''''''''''''''''''''''''''
 
@@ -410,6 +486,12 @@ LDAP
   automatically due to the :file:`mailservice.schema` being loaded into the
   database.
 
+:ref:`debops.snmpd` role
+''''''''''''''''''''''''
+
+- Don't create or modify the home directory of the :command:`snmpd` UNIX
+  account to avoid issues on Ubuntu 20.04.
+
 :ref:`debops.system_users` role
 '''''''''''''''''''''''''''''''
 
@@ -426,6 +508,9 @@ LDAP
   networking is set up and failing to bind to the selected bridge interface.
   The Tinc :command:`systemd` service will wait for the
   ``network-online.target`` unit to start up before activation.
+
+- Fixed an issue with the role where setting :envvar:`tinc__modprobe` variable
+  to ``False`` did not turn off support for loading required kernel modules.
 
 
 `debops v2.1.0`_ - 2020-06-21
@@ -2083,8 +2168,7 @@ User management
 ''''''''''''''''''''''''''''
 
 - The installation of :command:`etckeeper` will be disabled by default in
-  Python 3.x-only environments. See :ref:`role documentation
-  <etckeeper__ref_python3only>` for more details.
+  Python 3.x-only environments.
 
 :ref:`debops.gitlab` role
 '''''''''''''''''''''''''
