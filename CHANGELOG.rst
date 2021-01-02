@@ -161,7 +161,7 @@ Updates of upstream application versions
   has been updated to ``v1.4.1``.
 
 - In the :ref:`debops.netbox` role, the NetBox version has been updated to
-  ``v2.9.9``.
+  ``v2.10.1``.
   The plugin support added in ``v2.8.0`` can be configured from DebOps.
   The NetBox Request Queue Worker service is configured to support background jobs
   like reports to work.
@@ -232,6 +232,12 @@ LDAP
 
 - The role will create the :file:`/srv/www/` directory by default to allow for
   home directories used by web applications.
+
+:ref:`debops.gitlab` role
+'''''''''''''''''''''''''
+
+- The :command:`systemd` services no longer require Redis to be installed on
+  the same host as GitLab itself.
 
 :ref:`debops.grub` role
 '''''''''''''''''''''''
