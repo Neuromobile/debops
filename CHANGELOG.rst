@@ -87,9 +87,9 @@ LDAP
 :ref:`debops.owncloud` role
 '''''''''''''''''''''''''''
 
-- Drop Nextcloud 16 and 17 support because it is EOL. You need to upgrade Nextcloud
-  manually if you are running version 17 or below. The role now defaults to
-  Nextcloud 18 for new installations.
+- Drop Nextcloud 16, 17 and 18 support because it is EOL. You need to upgrade Nextcloud
+  manually if you are running version 18 or below. The role now defaults to
+  Nextcloud 19 for new installations.
 
 :ref:`debops.postgresql` role
 '''''''''''''''''''''''''''''
@@ -152,7 +152,7 @@ Updates of upstream application versions
   10.7 respectively.
 
 - In the :ref:`debops.roundcube` role, the Roundcube version installed by
-  default has been updated to ``1.4.9``.
+  default has been updated to ``1.4.10``.
 
 - In the :ref:`debops.owncloud` role, the Nextcloud version installed by
   default has been updated to ``v18.0``.
@@ -244,6 +244,16 @@ LDAP
 
 - The role will now activate both the serial console and the (previously
   disabled) native platform console when ``grub__serial_console`` is ``True``.
+
+:ref:`debops.icinga_web` role
+'''''''''''''''''''''''''''''
+
+- The role now automatically configures LDAP user and group support.
+
+- The role will install and configure the `Icinga Certificate Monitoring`__
+  module.
+
+  .. __: https://icinga.com/docs/icinga-certificate-monitoring/latest/
 
 :ref:`debops.lvm` role
 ''''''''''''''''''''''
@@ -371,6 +381,13 @@ LDAP
 '''''''''''''''''''''''''''
 
 - The role can now be used in check mode without throwing an AnsibleFilterError.
+
+:ref:`debops.gitlab` role
+'''''''''''''''''''''''''
+
+- Fixed an issue where the ``git`` UNIX account was not added to the
+  ``_sshusers`` local group when LDAP support was enabled on the host. This
+  prevented the usage of GitLab via SSH.
 
 :ref:`debops.ifupdown` role
 '''''''''''''''''''''''''''
