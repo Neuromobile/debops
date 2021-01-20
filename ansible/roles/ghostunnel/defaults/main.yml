@@ -16,22 +16,6 @@
 # .. include:: ../../../../includes/global.rst
 
 
-# Upstream configuration [[[
-# --------------------------
-
-# .. envvar:: ghostunnel__version [[[
-#
-# The version of release of Ghostunnel.
-ghostunnel__release_version: 'v1.5.3'
-
-                                                                   # ]]]
-# .. envvar:: ghostunnel__release_checksum [[[
-#
-# The checksum of release of Ghostunnel.
-ghostunnel__release_checksum: 'ab39ce50e9797cd30fbf90a13d9bc87976e94d5a2231051884e1033ffe57fe45'
-
-                                                                   # ]]]
-                                                                   # ]]]
 # Basic configuration [[[
 # -----------------------
 
@@ -107,6 +91,87 @@ ghostunnel__combined_services: '{{ ghostunnel__services
                                    + ghostunnel__host_services
                                    + ghostunnel__dependent_services }}'
 
+                                                                   # ]]]
+                                                                   # ]]]
+# Go application deployment [[[
+# -----------------------------
+
+# These variables control how the :command:`ghostunnel` binary is installed on the
+# host. The installation is performed by the :ref:`debops.golang` role, refer
+# to its documentation for details. The installation definition can be found in
+# the :envvar:`ghostunnel__golang__dependent_packages` variable.
+
+# .. envvar:: ghostunnel__upstream_gpg_key [[[
+#
+# The fingerprint of the GPG key which is used to sign the Ghostunnel releases. It
+# will be used to verify the downloaded signature file as well as the
+# :command:`git` tags in the source repository.
+ghostunnel__upstream_gpg_key: '2C67 955A 411C D552 810E 7598 CE8B 85D9 1C00 4E26'
+
+                                                                   # ]]]
+# .. envvar:: ghostunnel__upstream_release [[[
+#
+# The version of Ghostunnel to download from upstream on a given host. You should
+# specify the ``vX.Y.Z`` tagged release number.
+#
+# Available Ghostunnel releases and tags: https://github.com/ghostunnel/ghostunnel/releases
+ghostunnel__upstream_release: 'v1.5.3'
+
+                                                                   # ]]]
+# .. envvar:: ghostunnel__upstream_type [[[
+#
+# Specify the method which should be used to install Ghostunnel binary. Either
+# ``url`` to download the configured binary directly and verify it using the
+# specified GPG key, or ``git`` to clone the Ghostunnel :command:`git` repository
+# and build the specified version from source.
+ghostunnel__upstream_type: 'url'
+
+                                                                   # ]]]
+# .. envvar:: ghostunnel__upstream_url_mirror [[[
+#
+# The base URL of the Ghostunnel download page, should end with the ``/`` character.
+ghostunnel__upstream_url_mirror: 'https://github.com/ghostunnel/ghostunnel/releases/'
+
+                                                                   # ]]]
+# .. envvar:: ghostunnel__upstream_platform [[[
+#
+# Specify the OS type and platform architecture to use for installation. The
+# list of supported architectures and OS types can be found on the
+# https://github.com/ghostunnel/ghostunnel/releases/ page.
+ghostunnel__upstream_platform: 'linux-amd64-with-pkcs11'
+
+                                                                   # ]]]
+# .. envvar:: ghostunnel__upstream_url_checksum [[[
+#
+# The checksum of release of Ghostunnel.
+# Available Ghostunnel releases: https://github.com/ghostunnel/ghostunnel/releases
+ghostunnel__upstream_url_checksum: 'ab39ce50e9797cd30fbf90a13d9bc87976e94d5a2231051884e1033ffe57fe45'
+
+                                                                   # ]]]
+# .. envvar:: ghostunnel__upstream_url_binary [[[
+#
+# The path to the Ghostunnel binary on the upstream HTTPS server.
+ghostunnel__upstream_url_binary: '{{ ghostunnel__upstream_release +
+                                     "/ghostunnel-" + ghostunnel__upstream_release +
+                                     "-" + ghostunnel__upstream_platform }}'
+
+                                                                   # ]]]
+# .. envvar:: ghostunnel__upstream_git_repository [[[
+#
+# The URL of the upstream :command:`git` repository which contains Ghostunnel source
+# code.
+ghostunnel__upstream_git_repository: 'https://github.com/ghostunnel/ghostunnel'
+
+                                                                   # ]]]
+# .. envvar:: ghostunnel__binary [[[
+#
+# Absolute path to the :command:`ghostunnel` Go binary installed on the host.
+# See the :ref:`debops.golang` role for more details.
+ghostunnel__binary: '{{ ansible_local.golang.binaries["ghostunnel"]
+                        if (ansible_local.golang.binaries|d() and
+                            ansible_local.golang.binaries.ghostunnel|d())
+                        else "" }}'
+                                                                   # ]]]
                                                                    # ]]]
 # Ghostunnel default configuration [[[
 # ------------------------------------
@@ -194,20 +259,34 @@ ghostunnel__pki_key: 'default.key'
 ghostunnel__golang__dependent_packages:
 
   - name: 'ghostunnel'
-    state: 'present'
-    upstream_type: 'url'
+    upstream_type: '{{ ghostunnel__upstream_type }}'
+    gpg: '{{ ghostunnel__upstream_gpg_key }}'
     url:
 
-      - src: 'https://github.com/ghostunnel/ghostunnel/releases/download/{{ ghostunnel__release_version }}/ghostunnel-{{ ghostunnel__release_version }}-linux-amd64-with-pkcs11'
-        dest: 'releases/linux-amd64/ghostunnel/ghostunnel/{{ ghostunnel__release_version }}/ghostunnel-{{ ghostunnel__release_version }}-linux-amd64-with-pkcs11'
-        checksum: 'sha256:{{ ghostunnel__release_checksum }}'
+      - src: '{{ ghostunnel__upstream_url_mirror + "download/" + ghostunnel__upstream_url_binary }}'
+        dest: 'releases/{{ ghostunnel__upstream_platform }}/ghostunnel/ghostunnel/{{ ghostunnel__upstream_url_binary }}'
+        checksum: 'sha256:{{ ghostunnel__upstream_url_checksum }}'
 
     url_binaries:
 
-      - src: 'releases/linux-amd64/ghostunnel/ghostunnel/{{ ghostunnel__release_version }}/ghostunnel-{{ ghostunnel__release_version }}-linux-amd64-with-pkcs11'
+      - src: 'releases/{{ ghostunnel__upstream_platform }}/ghostunnel/ghostunnel/{{ ghostunnel__upstream_url_binary }}'
         dest: 'ghostunnel'
-        notify: [ 'Restart ghostunnel services' ]
+        notify: 'Restart ghostunnel services'
 
+    git:
+
+      - repo: '{{ ghostunnel__upstream_git_repository }}'
+        version: '{{ ghostunnel__upstream_release }}'
+        build_script: |
+          make clean ghostunnel
+
+    git_binaries:
+
+      - src: '{{ ghostunnel__upstream_git_repository.split("://")[1] + "/ghostunnel" }}'
+        dest: 'ghostunnel'
+        notify: 'Restart ghostunnel services'
+
+                                                                   # ]]]
 # .. envvar:: ghostunnel__etc_services__dependent_list [[[
 #
 # Configuration for the :ref:`debops.etc_services` Ansible role.
